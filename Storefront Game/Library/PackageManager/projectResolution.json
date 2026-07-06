@@ -1,0 +1,591 @@
+{
+  "context": {
+    "projectPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Packages",
+    "unityVersion": "6000.5.1f1"
+  },
+  "inputs": [
+    "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Packages/manifest.json",
+    "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Packages/packages-lock.json",
+    "/Applications/Unity/Hub/Editor/6000.5.1f1/Unity.app/Contents/Resources/PackageManager/BuiltInPackages/BuiltInPackagesCombined.sha1"
+  ],
+  "outputs": {
+    "com.unity.2d.animation@15.1.0": {
+      "name": "com.unity.2d.animation",
+      "displayName": "2D Animation",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.2d.animation@6d5a363ae647",
+      "fingerprint": "6d5a363ae6477c87cd6ddfac24c283f6754eb9de",
+      "editorCompatibility": "6000.5.0a7",
+      "version": "15.1.0",
+      "source": "registry",
+      "testable": false
+    },
+    "com.unity.2d.aseprite@5.0.3": {
+      "name": "com.unity.2d.aseprite",
+      "displayName": "2D Aseprite Importer",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.2d.aseprite@d13865913efa",
+      "fingerprint": "d13865913efa104292f5e3453c0f984432eba86e",
+      "editorCompatibility": "6000.5.0a6",
+      "version": "5.0.3",
+      "source": "registry",
+      "testable": false
+    },
+    "com.unity.2d.psdimporter@14.0.3": {
+      "name": "com.unity.2d.psdimporter",
+      "displayName": "2D PSD Importer",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.2d.psdimporter@5d82044f9e43",
+      "fingerprint": "5d82044f9e43e924f0dd0e0589c47746a16a4556",
+      "editorCompatibility": "6000.5.0a7",
+      "version": "14.0.3",
+      "source": "registry",
+      "testable": false
+    },
+    "com.unity.2d.sprite@1.0.0": {
+      "name": "com.unity.2d.sprite",
+      "displayName": "2D Sprite",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.2d.sprite@053a968eab56",
+      "fingerprint": "053a968eab56ad54f8322d007733b1e173abaae1",
+      "editorCompatibility": "2019.2.0a1",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.2d.spriteshape@15.0.3": {
+      "name": "com.unity.2d.spriteshape",
+      "displayName": "2D SpriteShape",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.2d.spriteshape@fcb7ec61a58b",
+      "fingerprint": "fcb7ec61a58bf047ffc3601cbbe5f1f594f3e2d6",
+      "editorCompatibility": "6000.5.0a7",
+      "version": "15.0.3",
+      "source": "registry",
+      "testable": false
+    },
+    "com.unity.2d.tilemap@1.0.0": {
+      "name": "com.unity.2d.tilemap",
+      "displayName": "2D Tilemap Editor",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.2d.tilemap@be0bacb99591",
+      "fingerprint": "be0bacb99591923cd20bd90d6d492c18f8f3aac5",
+      "editorCompatibility": "2019.2.0a1",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.2d.tilemap.extras@8.0.3": {
+      "name": "com.unity.2d.tilemap.extras",
+      "displayName": "2D Tilemap Extras",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.2d.tilemap.extras@a80140457adc",
+      "fingerprint": "a80140457adc3fbf3c0e1e8b8d92f7cd78462e7c",
+      "editorCompatibility": "6000.5.0a7",
+      "version": "8.0.3",
+      "source": "registry",
+      "testable": false
+    },
+    "com.unity.2d.tooling@3.0.1": {
+      "name": "com.unity.2d.tooling",
+      "displayName": "2D Tooling",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.2d.tooling@6f06ffb033c0",
+      "fingerprint": "6f06ffb033c059f5bbe93bd7638e3c7c01327b6a",
+      "editorCompatibility": "6000.5.0a1",
+      "version": "3.0.1",
+      "source": "registry",
+      "testable": false
+    },
+    "com.unity.collab-proxy@2.12.4": {
+      "name": "com.unity.collab-proxy",
+      "displayName": "Unity Version Control",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.collab-proxy@0b1559bcd34e",
+      "fingerprint": "0b1559bcd34e3fee21f770e54e68e58e80eae214",
+      "editorCompatibility": "2021.3.0f1",
+      "version": "2.12.4",
+      "source": "registry",
+      "testable": false
+    },
+    "com.unity.ide.rider@3.0.38": {
+      "name": "com.unity.ide.rider",
+      "displayName": "JetBrains Rider Editor",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.ide.rider@1f60b3138684",
+      "fingerprint": "1f60b3138684c97af67aa8d911b1632ba916d29d",
+      "editorCompatibility": "2021.3.0a1",
+      "version": "3.0.38",
+      "source": "registry",
+      "testable": false
+    },
+    "com.unity.ide.visualstudio@2.0.26": {
+      "name": "com.unity.ide.visualstudio",
+      "displayName": "Visual Studio Editor",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.ide.visualstudio@a99d56dec63f",
+      "fingerprint": "a99d56dec63ffb3a911a5a9bce9b77ba862a601c",
+      "editorCompatibility": "2021.3.0a1",
+      "version": "2.0.26",
+      "source": "registry",
+      "testable": false
+    },
+    "com.unity.inputsystem@1.19.0": {
+      "name": "com.unity.inputsystem",
+      "displayName": "Input System",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.inputsystem@21a28c3a6c83",
+      "fingerprint": "21a28c3a6c83903a93cf15d7d0714b773c50fdf6",
+      "editorCompatibility": "2022.3.0a1",
+      "version": "1.19.0",
+      "source": "registry",
+      "testable": false
+    },
+    "com.unity.multiplayer.center@1.0.1": {
+      "name": "com.unity.multiplayer.center",
+      "displayName": "Multiplayer Center",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.multiplayer.center@b860850997d0",
+      "fingerprint": "b860850997d026668b04ee7b71cb731ee193804c",
+      "editorCompatibility": "6000.0.0a1",
+      "version": "1.0.1",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.render-pipelines.universal@17.5.0": {
+      "name": "com.unity.render-pipelines.universal",
+      "displayName": "Universal Render Pipeline",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.render-pipelines.universal@be00b5bbd9a1",
+      "fingerprint": "be00b5bbd9a168ba0598aae8636cf822bcb23ec8",
+      "editorCompatibility": "6000.5.0a1",
+      "version": "17.5.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.test-framework@1.7.0": {
+      "name": "com.unity.test-framework",
+      "displayName": "Test Framework",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.test-framework@f3e6c9a02477",
+      "fingerprint": "f3e6c9a02477a9c34f2866d2cfbd3c2f80dd43f7",
+      "editorCompatibility": "6000.0.44f1",
+      "version": "1.7.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.timeline@1.8.12": {
+      "name": "com.unity.timeline",
+      "displayName": "Timeline",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.timeline@8cd8509afae5",
+      "fingerprint": "8cd8509afae5d2655af4657a214db1b563c28425",
+      "editorCompatibility": "2022.3.0a1",
+      "version": "1.8.12",
+      "source": "registry",
+      "testable": false
+    },
+    "com.unity.ugui@2.5.0": {
+      "name": "com.unity.ugui",
+      "displayName": "uGUI",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.ugui@4f9b15fd1386",
+      "fingerprint": "4f9b15fd13868276678fd95a5e0f7c029c70616a",
+      "editorCompatibility": "6000.5.0a1",
+      "version": "2.5.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.visualscripting@1.9.11": {
+      "name": "com.unity.visualscripting",
+      "displayName": "Visual Scripting",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.visualscripting@8bed5ad90189",
+      "fingerprint": "8bed5ad901895f10b7d0e524c4738cab14cef692",
+      "editorCompatibility": "2021.3.0a1",
+      "version": "1.9.11",
+      "source": "registry",
+      "testable": false
+    },
+    "com.unity.modules.accessibility@1.0.0": {
+      "name": "com.unity.modules.accessibility",
+      "displayName": "Accessibility",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.accessibility",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.adaptiveperformance@1.0.0": {
+      "name": "com.unity.modules.adaptiveperformance",
+      "displayName": "Adaptive Performance",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.adaptiveperformance",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.ai@1.0.0": {
+      "name": "com.unity.modules.ai",
+      "displayName": "AI",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.ai",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.androidjni@1.0.0": {
+      "name": "com.unity.modules.androidjni",
+      "displayName": "Android JNI",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.androidjni",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.animation@1.0.0": {
+      "name": "com.unity.modules.animation",
+      "displayName": "Animation",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.animation",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.assetbundle@1.0.0": {
+      "name": "com.unity.modules.assetbundle",
+      "displayName": "Asset Bundle",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.assetbundle",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.audio@1.0.0": {
+      "name": "com.unity.modules.audio",
+      "displayName": "Audio",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.audio",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.cloth@1.0.0": {
+      "name": "com.unity.modules.cloth",
+      "displayName": "Cloth",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.cloth",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.director@1.0.0": {
+      "name": "com.unity.modules.director",
+      "displayName": "Director",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.director",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.imageconversion@1.0.0": {
+      "name": "com.unity.modules.imageconversion",
+      "displayName": "Image Conversion",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.imageconversion",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.imgui@1.0.0": {
+      "name": "com.unity.modules.imgui",
+      "displayName": "IMGUI",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.imgui",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.jsonserialize@1.0.0": {
+      "name": "com.unity.modules.jsonserialize",
+      "displayName": "JSONSerialize",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.jsonserialize",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.particlesystem@1.0.0": {
+      "name": "com.unity.modules.particlesystem",
+      "displayName": "Particle System",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.particlesystem",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.physics@1.0.0": {
+      "name": "com.unity.modules.physics",
+      "displayName": "Physics",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.physics",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.physics2d@1.0.0": {
+      "name": "com.unity.modules.physics2d",
+      "displayName": "Physics 2D",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.physics2d",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.physicscore2d@1.0.0": {
+      "name": "com.unity.modules.physicscore2d",
+      "displayName": "Physics Core 2D",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.physicscore2d",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.screencapture@1.0.0": {
+      "name": "com.unity.modules.screencapture",
+      "displayName": "Screen Capture",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.screencapture",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.terrain@1.0.0": {
+      "name": "com.unity.modules.terrain",
+      "displayName": "Terrain",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.terrain",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.terrainphysics@1.0.0": {
+      "name": "com.unity.modules.terrainphysics",
+      "displayName": "Terrain Physics",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.terrainphysics",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.tilemap@1.0.0": {
+      "name": "com.unity.modules.tilemap",
+      "displayName": "Tilemap",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.tilemap",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.ui@1.0.0": {
+      "name": "com.unity.modules.ui",
+      "displayName": "UI",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.ui",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.uielements@1.0.0": {
+      "name": "com.unity.modules.uielements",
+      "displayName": "UIElements",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.uielements",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.umbra@1.0.0": {
+      "name": "com.unity.modules.umbra",
+      "displayName": "Umbra",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.umbra",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.unityanalytics@1.0.0": {
+      "name": "com.unity.modules.unityanalytics",
+      "displayName": "Unity Analytics",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.unityanalytics",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.unitywebrequest@1.0.0": {
+      "name": "com.unity.modules.unitywebrequest",
+      "displayName": "Unity Web Request",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.unitywebrequest",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.unitywebrequestassetbundle@1.0.0": {
+      "name": "com.unity.modules.unitywebrequestassetbundle",
+      "displayName": "Unity Web Request Asset Bundle",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.unitywebrequestassetbundle",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.unitywebrequestaudio@1.0.0": {
+      "name": "com.unity.modules.unitywebrequestaudio",
+      "displayName": "Unity Web Request Audio",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.unitywebrequestaudio",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.unitywebrequesttexture@1.0.0": {
+      "name": "com.unity.modules.unitywebrequesttexture",
+      "displayName": "Unity Web Request Texture",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.unitywebrequesttexture",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.unitywebrequestwww@1.0.0": {
+      "name": "com.unity.modules.unitywebrequestwww",
+      "displayName": "Unity Web Request WWW",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.unitywebrequestwww",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.vectorgraphics@1.0.0": {
+      "name": "com.unity.modules.vectorgraphics",
+      "displayName": "Vector Graphics",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.vectorgraphics",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.vehicles@1.0.0": {
+      "name": "com.unity.modules.vehicles",
+      "displayName": "Vehicles",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.vehicles",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.video@1.0.0": {
+      "name": "com.unity.modules.video",
+      "displayName": "Video",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.video",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.wind@1.0.0": {
+      "name": "com.unity.modules.wind",
+      "displayName": "Wind",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.wind",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.xr@1.0.0": {
+      "name": "com.unity.modules.xr",
+      "displayName": "XR",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.xr",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.subsystems@1.0.0": {
+      "name": "com.unity.modules.subsystems",
+      "displayName": "Subsystems",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.subsystems",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.hierarchycore@1.0.0": {
+      "name": "com.unity.modules.hierarchycore",
+      "displayName": "Hierarchy Core",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.modules.hierarchycore",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.ext.nunit@2.1.0": {
+      "name": "com.unity.ext.nunit",
+      "displayName": "Custom NUnit",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.ext.nunit@44f7d31723bd",
+      "fingerprint": "44f7d31723bdd3bc52a37606118a195329e01928",
+      "editorCompatibility": "2019.4.0a1",
+      "version": "2.1.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.render-pipelines.core@17.5.0": {
+      "name": "com.unity.render-pipelines.core",
+      "displayName": "Scriptable Render Pipeline Core",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.render-pipelines.core@d7ce3ed2cd80",
+      "fingerprint": "d7ce3ed2cd809b73f3b99a5b2a043ea09e7e4c28",
+      "editorCompatibility": "6000.5.0a1",
+      "version": "17.5.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.shadergraph@17.5.0": {
+      "name": "com.unity.shadergraph",
+      "displayName": "Shader Graph",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.shadergraph@2df19e8719bc",
+      "fingerprint": "2df19e8719bcd1b35a2c923bb315ef8047a780ba",
+      "editorCompatibility": "6000.5.0a1",
+      "version": "17.5.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.render-pipelines.universal-config@17.5.0": {
+      "name": "com.unity.render-pipelines.universal-config",
+      "displayName": "Universal Render Pipeline Config",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.render-pipelines.universal-config@fdda01c80fe3",
+      "fingerprint": "fdda01c80fe3156555919c7f18ff421792d1b592",
+      "editorCompatibility": "6000.5.0a1",
+      "version": "17.5.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.2d.common@14.0.1": {
+      "name": "com.unity.2d.common",
+      "displayName": "2D Common",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.2d.common@73badf92ba8b",
+      "fingerprint": "73badf92ba8b0f382c4b25d75c8309bbcde3e333",
+      "editorCompatibility": "6000.5.0a1",
+      "version": "14.0.1",
+      "source": "registry",
+      "testable": false
+    },
+    "com.unity.mathematics@1.4.0": {
+      "name": "com.unity.mathematics",
+      "displayName": "Mathematics",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.mathematics@981956d94fb6",
+      "fingerprint": "981956d94fb67524c64303c45a850c84830359e9",
+      "editorCompatibility": "6000.5.0a1",
+      "version": "1.4.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.collections@6.5.0": {
+      "name": "com.unity.collections",
+      "displayName": "Collections",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.collections@a43cabe808ca",
+      "fingerprint": "a43cabe808ca4c4f0433f6fdfa4d702ccd4f4b6e",
+      "editorCompatibility": "6000.5.0a1",
+      "version": "6.5.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.searcher@4.9.4": {
+      "name": "com.unity.searcher",
+      "displayName": "Searcher",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.searcher@d45a78918735",
+      "fingerprint": "d45a78918735dd5b1de2247c6e3567c60aa24115",
+      "editorCompatibility": "2019.1.0a1",
+      "version": "4.9.4",
+      "source": "registry",
+      "testable": false
+    },
+    "com.unity.burst@1.8.29": {
+      "name": "com.unity.burst",
+      "displayName": "Burst",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.burst@6bb9aca3ef38",
+      "fingerprint": "6bb9aca3ef382e98bd0c1e4ab5fc74380c16095f",
+      "editorCompatibility": "2022.3.0a1",
+      "version": "1.8.29",
+      "source": "registry",
+      "testable": false
+    },
+    "com.unity.nuget.mono-cecil@1.11.6": {
+      "name": "com.unity.nuget.mono-cecil",
+      "displayName": "Mono Cecil",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.nuget.mono-cecil@ecb9724e46ff",
+      "fingerprint": "ecb9724e46fff855c46a4f37f0a3377a3cfffc06",
+      "editorCompatibility": "2019.4.0a1",
+      "version": "1.11.6",
+      "source": "registry",
+      "testable": false
+    },
+    "com.unity.test-framework.performance@3.5.0": {
+      "name": "com.unity.test-framework.performance",
+      "displayName": "Performance testing API",
+      "resolvedPath": "/Users/ooikaixuan/Downloads/School/Capstone/Storefront-Game/Storefront Game/Library/PackageCache/com.unity.test-framework.performance@8b56083ec0f0",
+      "fingerprint": "8b56083ec0f03c33121bea5c806c91b0fa2f2b69",
+      "editorCompatibility": "2020.3.0a1",
+      "version": "3.5.0",
+      "source": "registry",
+      "testable": false
+    }
+  }
+}
