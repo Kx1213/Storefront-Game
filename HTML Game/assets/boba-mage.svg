@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 540" role="img" aria-labelledby="title desc">
+  <title id="title">Boba Mage</title>
+  <desc id="desc">A stylized mage character with a cup and teal magic effects.</desc>
+  <defs>
+    <linearGradient id="robe" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#6a4c93"/>
+      <stop offset="1" stop-color="#4ecdc4"/>
+    </linearGradient>
+    <linearGradient id="tea" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#ffe4a1"/>
+      <stop offset="1" stop-color="#c98b5f"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="240" cy="502" rx="138" ry="24" fill="#101014" opacity=".28"/>
+  <path d="M130 518c8-117 42-198 101-243h18c59 45 93 126 101 243z" fill="url(#robe)"/>
+  <path d="M143 220c19-82 62-123 130-123 42 1 68 16 87 40-48-3-91 12-132 45-26 20-54 32-85 38z" fill="#2b2444"/>
+  <rect x="155" y="189" width="170" height="130" rx="60" fill="#dba27d"/>
+  <circle cx="202" cy="249" r="12" fill="#101014"/>
+  <circle cx="280" cy="249" r="12" fill="#101014"/>
+  <path d="M215 290c20 13 43 13 66 0" fill="none" stroke="#101014" stroke-width="11" stroke-linecap="round"/>
+  <path d="M147 338c-59 27-93 70-101 128 48 2 93-19 135-62z" fill="#4ecdc4"/>
+  <path d="M333 338c59 27 93 70 101 128-48 2-93-19-135-62z" fill="#6a4c93"/>
+  <path d="M317 133c23-38 54-53 94-45-38 26-55 59-50 99-20-27-35-45-44-54z" fill="#4ecdc4"/>
+  <rect x="186" y="356" width="112" height="122" rx="22" fill="#f7f3ea"/>
+  <path d="M199 384h86l-12 72h-62z" fill="url(#tea)"/>
+  <circle cx="219" cy="438" r="9" fill="#39221c"/>
+  <circle cx="248" cy="448" r="9" fill="#39221c"/>
+  <circle cx="267" cy="426" r="9" fill="#39221c"/>
+  <path d="M194 354h98" stroke="#4ecdc4" stroke-width="16" stroke-linecap="round"/>
+  <circle cx="100" cy="174" r="18" fill="#4ecdc4"/>
+  <circle cx="394" cy="226" r="14" fill="#ffd166"/>
+  <circle cx="347" cy="75" r="11" fill="#ff6b6b"/>
+</svg>

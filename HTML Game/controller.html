@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Storefront Battle Controller</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="./styles.css">
+    <script type="module" src="./src/controller.js"></script>
+  </head>
+  <body class="controller-page">
+    <main class="phone-shell">
+      <header class="phone-header">
+        <div>
+          <span class="eyebrow">Storefront battle</span>
+          <h1>Phone controller</h1>
+        </div>
+        <span id="phoneConnection" class="connection-dot">Offline</span>
+      </header>
+
+      <section id="joinPanel" class="phone-panel">
+        <h2>Enter game code</h2>
+        <form id="joinForm" class="join-form">
+          <input id="manualGameId" name="gameId" autocomplete="off" placeholder="storefront-1">
+          <button type="submit">Join</button>
+        </form>
+      </section>
+
+      <section id="characterPanel" class="phone-panel" hidden>
+        <div class="panel-heading">
+          <div>
+            <span id="controllerGameCode" class="game-code">STORE</span>
+            <h2>Pick your character</h2>
+          </div>
+          <p id="characterHint">Your choice appears on the big screen.</p>
+        </div>
+        <div id="characterGrid" class="character-grid"></div>
+      </section>
+
+      <section id="battlePanel" class="phone-panel" hidden>
+        <div class="controller-score">
+          <div>
+            <span id="phonePlayerName" class="fighter-title">Player</span>
+            <div class="hp-track">
+              <div id="phonePlayerHpBar" class="hp-fill"></div>
+            </div>
+            <strong id="phonePlayerHpText">0 / 0</strong>
+          </div>
+          <div>
+            <span id="phoneEnemyName" class="fighter-title">Enemy</span>
+            <div class="hp-track enemy">
+              <div id="phoneEnemyHpBar" class="hp-fill"></div>
+            </div>
+            <strong id="phoneEnemyHpText">0 / 0</strong>
+          </div>
+        </div>
+
+        <div class="turn-card">
+          <span id="phoneTurn">Turn 1</span>
+          <h2 id="movePrompt">Choose your move</h2>
+          <p id="phoneRoundMessage">Watch the big screen after locking in.</p>
+        </div>
+
+        <div id="moveGrid" class="move-grid"></div>
+      </section>
+
+      <section id="waitingPanel" class="phone-panel" hidden>
+        <h2>Battle in progress</h2>
+        <p>Another player is controlling this screen right now.</p>
+      </section>
+
+      <section id="gameOverPanel" class="phone-panel" hidden>
+        <h2 id="phoneWinnerText">Battle complete</h2>
+        <p id="phoneGameOverMessage">Thanks for playing.</p>
+        <button id="playAgainButton" type="button">Play again</button>
+      </section>
+    </main>
+  </body>
+</html>

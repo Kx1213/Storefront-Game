@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Storefront Battle Display</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="./styles.css">
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <script type="module" src="./src/screen.js"></script>
+  </head>
+  <body class="screen-page">
+    <main id="screenApp" class="screen-app">
+      <section id="attractView" class="display-view attract-view">
+        <video id="attractVideo" class="attract-video" autoplay muted loop playsinline>
+          <source src="./assets/gameplay-loop.mp4" type="video/mp4">
+        </video>
+        <div class="video-fallback" aria-hidden="true">
+          <div class="fallback-stage">
+            <img src="./assets/flame-chef.svg" alt="">
+            <span>VS</span>
+            <img src="./assets/rival-chef.svg" alt="">
+          </div>
+        </div>
+        <div class="attract-scrim" aria-hidden="true"></div>
+
+        <div class="display-shell">
+          <div class="cta-block">
+            <p class="eyebrow">Live storefront battle</p>
+            <h1>Battle on the big screen</h1>
+            <p class="cta-copy">Scan, pick your character, then call every move from your phone.</p>
+            <div id="screenStatus" class="status-pill">Waiting for challenger</div>
+          </div>
+
+          <aside class="qr-panel" aria-label="Join game">
+            <canvas id="joinQr" width="320" height="320"></canvas>
+            <img id="joinQrFallback" class="qr-fallback" alt="QR code to join game" hidden>
+            <strong>Scan to play</strong>
+            <span id="joinUrlLabel" class="join-url"></span>
+            <span id="gameCodeLabel" class="game-code"></span>
+          </aside>
+        </div>
+      </section>
+
+      <section id="battleView" class="display-view battle-view" hidden>
+        <header class="battle-topbar">
+          <div>
+            <span class="eyebrow">Storefront battle</span>
+            <strong id="battleStatus">Choose a move</strong>
+          </div>
+          <div class="turn-badge">
+            <span>Turn</span>
+            <strong id="turnNumber">1</strong>
+          </div>
+        </header>
+
+        <div class="arena">
+          <article id="playerFighter" class="fighter player-side">
+            <div class="fighter-hud">
+              <div>
+                <span id="playerTitle" class="fighter-title">Player</span>
+                <h2 id="playerName">Waiting</h2>
+              </div>
+              <span id="playerHpText" class="hp-text">0 / 0</span>
+            </div>
+            <div class="hp-track">
+              <div id="playerHpBar" class="hp-fill"></div>
+            </div>
+            <img id="playerArt" class="fighter-art" alt="Player character">
+            <div id="playerShield" class="shield-meter"></div>
+          </article>
+
+          <div class="versus-column">
+            <span class="versus-mark">VS</span>
+            <p id="roundMessage" class="round-message">Choose a move from your phone.</p>
+            <div id="lastMoves" class="last-moves"></div>
+          </div>
+
+          <article id="enemyFighter" class="fighter enemy-side">
+            <div class="fighter-hud">
+              <div>
+                <span id="enemyTitle" class="fighter-title">Enemy</span>
+                <h2 id="enemyName">Rival Chef</h2>
+              </div>
+              <span id="enemyHpText" class="hp-text">0 / 0</span>
+            </div>
+            <div class="hp-track">
+              <div id="enemyHpBar" class="hp-fill"></div>
+            </div>
+            <img id="enemyArt" class="fighter-art" alt="Enemy character">
+            <div id="enemyShield" class="shield-meter"></div>
+          </article>
+        </div>
+
+        <footer class="battle-footer">
+          <div id="battleLog" class="battle-log"></div>
+          <aside class="mini-qr" aria-label="Join QR code">
+            <canvas id="joinQrSmall" width="132" height="132"></canvas>
+            <span id="miniGameCode">STORE</span>
+          </aside>
+        </footer>
+      </section>
+
+      <section id="gameOverView" class="display-view game-over-view" hidden>
+        <div class="game-over-copy">
+          <p class="eyebrow">Battle complete</p>
+          <h1 id="winnerText">Winner</h1>
+          <p id="gameOverMessage">Scan to start the next battle.</p>
+        </div>
+        <aside class="qr-panel compact" aria-label="Join next game">
+          <canvas id="gameOverQr" width="260" height="260"></canvas>
+          <strong>Next challenger</strong>
+          <span id="gameOverCode" class="game-code"></span>
+        </aside>
+      </section>
+
+      <div class="staff-controls" aria-label="Staff controls">
+        <button id="resetButton" type="button">Reset</button>
+        <button id="copyJoinButton" type="button">Copy join link</button>
+        <button id="fullScreenButton" type="button">Fullscreen</button>
+      </div>
+    </main>
+  </body>
+</html>

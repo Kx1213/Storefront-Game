@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 540" role="img" aria-labelledby="title desc">
+  <title id="title">Rival Chef</title>
+  <desc id="desc">A stylized rival chef character with steel and red accents.</desc>
+  <defs>
+    <linearGradient id="jacket" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#455a64"/>
+      <stop offset="1" stop-color="#111820"/>
+    </linearGradient>
+    <linearGradient id="steel" x1="0" x2="1">
+      <stop offset="0" stop-color="#f7f3ea"/>
+      <stop offset="1" stop-color="#8fa3ad"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="240" cy="502" rx="142" ry="24" fill="#101014" opacity=".3"/>
+  <path d="M151 145c-27-42-7-89 42-94 15-34 78-37 96-2 48-4 76 40 54 88-54-16-118-13-192 8z" fill="#f7f3ea"/>
+  <path d="M140 171c61-28 129-31 204-9l-20 91H158z" fill="#f7f3ea"/>
+  <rect x="148" y="217" width="184" height="125" rx="56" fill="#c89272"/>
+  <path d="M182 268h45" stroke="#101014" stroke-width="12" stroke-linecap="round"/>
+  <path d="M257 268h45" stroke="#101014" stroke-width="12" stroke-linecap="round"/>
+  <path d="M211 313c22 12 45 12 68 0" fill="none" stroke="#101014" stroke-width="10" stroke-linecap="round"/>
+  <path d="M113 525c8-102 40-174 98-215h58c58 41 90 113 98 215z" fill="url(#jacket)"/>
+  <path d="M240 317l35 208h-70z" fill="#ff6b6b"/>
+  <path d="M128 372c-62 24-98 64-107 120 47 3 91-17 133-59z" fill="#263238"/>
+  <path d="M352 372c62 24 98 64 107 120-47 3-91-17-133-59z" fill="#263238"/>
+  <path d="M88 426l113-72" stroke="url(#steel)" stroke-width="20" stroke-linecap="round"/>
+  <path d="M392 426l-113-72" stroke="url(#steel)" stroke-width="20" stroke-linecap="round"/>
+  <rect x="181" y="381" width="118" height="18" rx="9" fill="#f7f3ea"/>
+  <circle cx="220" cy="432" r="14" fill="#f7f3ea"/>
+  <circle cx="260" cy="432" r="14" fill="#f7f3ea"/>
+</svg>

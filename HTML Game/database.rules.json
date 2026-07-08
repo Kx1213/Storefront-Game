@@ -1,0 +1,10 @@
+{
+  "rules": {
+    "sessions": {
+      "$gameId": {
+        ".read": true,
+        ".write": true
+      }
+    }
+  }
+}
