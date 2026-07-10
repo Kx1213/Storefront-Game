@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 540" role="img" aria-labelledby="title desc">
+  <title id="title">Flame Chef</title>
+  <desc id="desc">A stylized chef character with warm red and yellow colors.</desc>
+  <defs>
+    <linearGradient id="coat" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#ff7a45"/>
+      <stop offset="1" stop-color="#c92c2c"/>
+    </linearGradient>
+    <linearGradient id="fire" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#ffe66d"/>
+      <stop offset="1" stop-color="#e34b35"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="240" cy="502" rx="140" ry="24" fill="#101014" opacity=".28"/>
+  <path d="M158 144c-35-9-52-47-30-74 17-22 51-20 66 4 14-42 80-45 98-3 24-25 66-9 70 27 4 42-33 61-64 47z" fill="#fff4df"/>
+  <path d="M141 166h198l-17 94H158z" fill="#fff4df"/>
+  <rect x="147" y="220" width="186" height="120" rx="56" fill="#f2b28f"/>
+  <circle cx="191" cy="274" r="13" fill="#101014"/>
+  <circle cx="289" cy="274" r="13" fill="#101014"/>
+  <path d="M207 314c24 20 52 20 76 0" fill="none" stroke="#101014" stroke-width="12" stroke-linecap="round"/>
+  <path d="M116 526c8-95 31-166 66-214h116c35 48 58 119 66 214z" fill="url(#coat)"/>
+  <path d="M240 320l36 206h-72z" fill="#fff4df" opacity=".94"/>
+  <path d="M125 382c-58 14-94 48-98 95 44 7 89-7 128-45z" fill="#e34b35"/>
+  <path d="M355 382c58 14 94 48 98 95-44 7-89-7-128-45z" fill="#e34b35"/>
+  <path d="M118 438c33-18 65-19 94-4" fill="none" stroke="#ffd166" stroke-width="18" stroke-linecap="round"/>
+  <path d="M362 438c-33-18-65-19-94-4" fill="none" stroke="#ffd166" stroke-width="18" stroke-linecap="round"/>
+  <path d="M221 426c7-42 34-57 34-96 38 39 70 79 57 135-10 44-49 67-83 55-38-13-53-53-32-89 6 20 16 29 24 31z" fill="url(#fire)"/>
+</svg>

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 520" role="img" aria-labelledby="title desc">
+  <title id="title">Monster Curry Beast</title>
+  <desc id="desc">A hulking green curry monster used as the enemy in the storefront battle.</desc>
+  <defs>
+    <linearGradient id="skin" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#67c98c"/>
+      <stop offset="1" stop-color="#1d6e58"/>
+    </linearGradient>
+    <linearGradient id="armor" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#52646b"/>
+      <stop offset="1" stop-color="#1a2428"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="260" cy="485" rx="170" ry="26" fill="#101014" opacity=".32"/>
+  <path d="M148 220c-26-30-35-77-4-111 29-32 77-24 104 8 29-41 91-37 116 6 34-15 74 4 84 40 10 38-14 73-49 86z" fill="#214b3e"/>
+  <path d="M137 505c8-122 45-214 122-276 79 62 118 154 126 276z" fill="url(#skin)"/>
+  <path d="M150 275c-66 18-111 64-132 137 49 10 103-6 161-47z" fill="#1f8064"/>
+  <path d="M370 275c66 18 111 64 132 137-49 10-103-6-161-47z" fill="#1f8064"/>
+  <path d="M161 186c25-79 86-120 183-95 36 34 44 82 24 144-66-26-135-27-207-4z" fill="url(#armor)"/>
+  <circle cx="210" cy="221" r="15" fill="#f5ad0f"/>
+  <circle cx="307" cy="221" r="15" fill="#f5ad0f"/>
+  <path d="M211 278c33 22 67 22 101 0" fill="none" stroke="#111820" stroke-width="15" stroke-linecap="round"/>
+  <path d="M175 342c55 29 113 30 174 0" fill="none" stroke="#733b2c" stroke-width="44" stroke-linecap="round"/>
+  <path d="M180 135l-46-34M344 128l48-39" stroke="#d9e1df" stroke-width="22" stroke-linecap="round"/>
+  <path d="M120 372l92-64M400 372l-92-64" stroke="#263238" stroke-width="24" stroke-linecap="round"/>
+  <circle cx="160" cy="388" r="28" fill="#67c98c"/>
+  <circle cx="360" cy="388" r="28" fill="#67c98c"/>
+</svg>

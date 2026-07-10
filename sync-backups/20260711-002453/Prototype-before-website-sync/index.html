@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Curry Personality Test - Home (Fun Background)</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Work+Sans:wght@400;700&display=swap" rel="stylesheet" />
+	<!-- Material Symbols -->
+	<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+	<!-- Tailwind CDN (used by the design) -->
+	<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+	<script id="tailwind-config">
+		tailwind.config = {
+			darkMode: "class",
+			theme: {
+				extend: {
+					spacing: {
+						"gutter": "24px",
+						"stack-lg": "48px",
+						"stack-md": "32px"
+					}
+				}
+			}
+		}
+	</script>
+	<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+	<!-- Floating background monsters (fun background) -->
+	<div aria-hidden="true" class="fixed-bg-monsters">
+		<img class="monster-watermark" style="top:8%; left:4%; width:18rem; transform:rotate(-12deg)" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzWTQqewwEA9dMzAuy-7ectQ8nUhhBBmwoVPIaQbwDFCg1B5rXhIF62GYcathlc2XsWCsJnM_kgF5FIz2sQeGJcVYHkN-NjN9Y8ncrXxV-8N0K3tCMElKKiutSGCDTVgeIKXVNvmYOX3klF4ZmU-P05Dshz3R7dFYfrHO1c3_zg-oH_JD1S3ZAQV60i71m_THU4GFOUwRJ1iT76NhzyTAVQsMy-BNsTE2rwX5nbHH7XEwqvPcY1xIbdFh0R2VgbJTAngVoeTwzmA8" alt="" loading="lazy" decoding="async" />
+		<img class="monster-watermark" style="top:6%; right:5%; width:14rem; transform:rotate(14deg)" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRGF7B3Sk7ggqVVNpdhkoxDAFMrjDbn5M1WLAZW71lLSBNSMKlu43ESquAOJouyUf6s9GtiyAwhNLpPRAk5LO-gu14-OEGIaOtK_WERrGKaejmg3PBXggukBv79EyhT2A5qkVeK_RN7kV-gmct2RHr3kVZCIt5GeRwhwsxJlQFNJVzmVfwsG8Wovhyc8NMJKbd_g7jzD3rNQg6ubrvsdP_RsYh7O4th-sf6NsmzcBd9o9_td-CSI0ZGQYd2rnUU2--y9UBhUYrTOM" alt="" loading="lazy" decoding="async" />
+	</div>
+		<!-- TopAppBar Component (from HomePage) -->
+		<header class="fixed top-0 left-0 w-full z-50 bg-surface/80 backdrop-blur-md dark:bg-on-background/80 shadow-sm">
+			<div class="max-w-[1200px] mx-auto px-gutter py-4 flex justify-between items-center">
+				<div class="font-headline-lg text-headline-lg font-extrabold text-primary dark:text-primary-fixed-dim tracking-tighter">
+					<img src="images/Monster Curry Updated Logo_White Text 2.png" alt="Monster Curry" style="display:block;">
+				</div>
+				<div class="flex items-center gap-3">
+					<a href="#" aria-label="Facebook" class="social-logo-link">
+						<img src="images/facebook_logo.png" alt="Facebook" class="social-logo-icon">
+					</a>
+					<a href="#" aria-label="TikTok" class="social-logo-link">
+						<img src="images/tiktok_logo.png" alt="TikTok" class="social-logo-icon">
+					</a>
+					<a href="#" aria-label="Instagram" class="social-logo-link">
+						<img src="images/instagram_logo.png" alt="Instagram" class="social-logo-icon">
+					</a>
+				</div>
+			</div>
+		</header>
+
+	<main class="phone-shell">
+		<section class="stage" aria-live="polite">
+			<!-- Atmospheric Background Decoration -->
+			<div class="absolute -top-24 -right-24 w-96 h-96 bg-primary/10 rounded-full blur-[100px]"></div>
+			<div class="absolute -bottom-24 -left-24 w-96 h-96 bg-tertiary-container/10 rounded-full blur-[100px]"></div>
+			<!-- Intro / Hero (keeps id intro-screen) -->
+			<article class="frame intro-frame" id="intro-screen">
+				<div class="frame-body">
+					<div class="container max-w-[1200px] mx-auto px-container-padding-mobile md:px-container-padding-desktop py-stack-lg">
+						<div class="flex flex-col lg:flex-row gap-stack-lg items-center">
+							<!-- Left Column: Visual Impact -->
+							<div class="w-full lg:w-5/12 hidden md:block">
+								<div class="relative group">
+									<div class="absolute -inset-4 bg-primary/20 rounded-[48px] blur-2xl group-hover:bg-primary/30 transition-all duration-500"></div>
+									<img class="relative rounded-[40px] w-full h-[600px] object-cover shadow-2xl grayscale-[20%] hover:grayscale-0 transition-all duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA19FznHCQn7o5-jtCW_ZjAGlDb5RWr3gmWr2zOF8v0M_c1XBk99JjeaPzbXKbAdKMxSuC6pi77-Feak8TQqSDTsa-G9zqvtZKz-D7xCJukq2uxxSCRTCFvhyTWwFRJxQpeXWj2EvVWn8o1ub1GP0fKGccdTNpe1hZeEbOKGcFYtO8MqtJUJ3UQ8XrCrO8IUsR4z_UsZwagcqZJ3Ce78ktudaTaqOmj8mvaZswT7qB1c4m4fGvomaQIWcH-pwKXXyaXLkJJbhi36ec" alt="Curry plate" fetchpriority="high" decoding="async">
+								</div>
+							</div>
+							<!-- Right Column: The Quiz Card -->
+							<div class="w-full lg:w-7/12">
+								<div class="monster-red-gradient rounded-[40px] p-stack-md md:p-stack-lg flex flex-col items-center text-center text-on-primary shadow-[0px_20px_60px_rgba(188,1,0,0.3)] transition-transform hover:scale-[1.01] duration-500 relative z-20">
+									<div class="mb-stack-md">
+										<span class="inline-block px-4 py-1 bg-white/20 rounded-full font-label-bold text-label-bold uppercase tracking-widest mb-base">Flavor Quest</span>
+										<h1 class="font-headline-xl text-headline-xl md:text-headline-xl text-on-primary mt-base leading-tight">Curry <br>Personality Test</h1>
+									</div>
+									<p class="font-body-md text-body-md text-white/90 max-w-md mb-stack-sm">Want to know more about your personality?</p>
+									<p class="font-body-sm text-body-sm text-white/70 max-w-sm mb-stack-lg leading-relaxed">Uncover the "monster" flavor profile that rules your tastebuds. Whether you're a fiery Spiced King or a smooth Savory Giant, your plate tells a story.</p>
+									<div class="w-full flex flex-col gap-base mt-stack-md">
+										<button id="start-button" class="w-full md:w-auto md:min-w-[200px] mx-auto bg-on-primary text-primary px-stack-lg py-4 rounded-xl font-label-bold text-label-bold shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 active:scale-95 pulse-glow">Start Quiz</button>
+										<div class="mt-stack-md flex flex-col items-center gap-3 opacity-80">
+											<span class="font-body-sm text-body-sm text-white/80">Join 12,000+ Curry Monsters</span>
+											<div class="flex items-center gap-3">
+												<div class="w-8 h-8 rounded-full border-2 border-primary bg-surface-container-high flex items-center justify-center text-[10px] font-bold text-primary">MC</div>
+												<div class="w-8 h-8 rounded-full border-2 border-primary bg-surface-container-high flex items-center justify-center text-[10px] font-bold text-primary">MM</div>
+												<div class="w-8 h-8 rounded-full border-2 border-primary bg-surface-container-high flex items-center justify-center text-[10px] font-bold text-primary">CS</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</article>
+
+			<!-- Quiz screen (revamped from Questions.html) -->
+			<article class="frame quiz-frame hidden" id="quiz-screen" style="display:none">
+				<div class="frame-body">
+					<div class="relative z-10 w-full max-w-[680px] mx-auto">
+						<div class="question-box bg-outline-variant/40 rounded-[28px] p-6 md:p-8 shadow-2xl backdrop-blur-md border border-white/10">
+
+							<div class="flex items-center justify-center flex-col text-center">
+								<div class="w-36 h-36 md:w-48 md:h-48 mb-4 rounded-[24px] overflow-hidden bg-white/90 p-4 shadow-xl border border-white/30 flex items-center justify-center" aria-hidden="true">
+									<div class="logo-progress-icon">
+										<img src="images/MC_Logo_Round_Black_n_White.png" class="logo-progress-base" alt="">
+										<div class="logo-progress-fill" id="quiz-logo-fill-wrapper" style="height: 0%;">
+											<img src="images/MC_Logo_Round_White.png" class="logo-progress-color" alt="">
+										</div>
+									</div>
+								</div>
+								<p class="question-heading question-prompt" id="question-prompt"></p>
+
+								<div class="w-full mt-4 space-y-4" id="option-list"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="w-full flex justify-center mt-4">
+					<button class="px-8 py-3 rounded-full bg-white text-on-surface font-label-bold text-label-bold shadow-md hover:shadow-xl hover:bg-surface-container-low transition-all duration-300 active:scale-95 flex items-center gap-2" id="back-button" type="button" style="display:none">
+						<span class="material-symbols-outlined text-[20px]" data-icon="arrow_back">arrow_back</span>
+						Back
+					</button>
+				</div>
+			</article>
+
+			<!-- Result screen (keeps id result-screen) -->
+			<article class="frame result-frame hidden" id="result-screen" style="display:none">
+				<div class="frame-body">
+					<div class="result-card even-space glass-effect rounded-2xl p-6" style="width:100%;max-width:720px;margin:0 auto;text-align:center">
+						<div class="result-illustration" id="result-illustration">
+								<img id="result-illustration-img" src="" alt="" style="width:100%;height:100%;object-fit:contain;">
+							</div>
+						<h2 class="result-name" id="result-name">Personality name</h2>
+						<p class="result-background" id="result-background"></p>
+						<p class="result-description" id="result-description"></p>
+						<!-- Feedback Section -->
+						<div class="feedback-section mt-8">
+  						  <h3 class="text-xl font-bold mb-4">Rate This Test</h3>
+
+  						  <!-- Stars -->
+   						 <div class="star-rating mb-4">
+   						     <span class="star" data-rating="1">★</span>
+  						      <span class="star" data-rating="2">★</span>
+   						     <span class="star" data-rating="3">★</span>
+ 						       <span class="star" data-rating="4">★</span>
+  						      <span class="star" data-rating="5">★</span>
+   						 </div>
+
+  						  <!-- Comment -->
+   						 <textarea
+   						     id="feedback-comment"
+    						    placeholder="Tell us what you think..."
+   						     class="w-full p-3 rounded-lg text-black resize-none"
+   						     rows="4"
+ 						   ></textarea>
+
+  						  <button id="submit-feedback" type="button">
+      						  Submit Feedback
+  						  </button>
+
+   						 <p id="feedback-message" class="mt-3 text-sm"></p>
+						</div>
+					</div>
+				</div>
+				<button class="action-button" id="home-button" type="button">Home</button>
+			</article>
+		</section>
+	</main>
+
+	<script type="module" src="scripts.js"></script>
+</body>
+</html>

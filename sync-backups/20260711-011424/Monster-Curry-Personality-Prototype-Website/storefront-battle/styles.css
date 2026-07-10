@@ -1,0 +1,826 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #151515;
+  color: #fff7e8;
+  letter-spacing: 0;
+  --red: #ed1d24;
+  --gold: #f5ad0f;
+  --cream: #fff7e8;
+  --ink: #151515;
+  --green: #32d27b;
+  --line: rgba(255, 255, 255, 0.18);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  border: 0;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.screen-page {
+  overflow: hidden;
+  background: #151515;
+}
+
+.screen-app,
+.display-view {
+  min-height: 100vh;
+}
+
+.display-view {
+  position: relative;
+  overflow: hidden;
+}
+
+.attract-video,
+.video-fallback,
+.screen-scrim {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.attract-video {
+  z-index: 1;
+  object-fit: cover;
+}
+
+.video-fallback {
+  z-index: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-content: center;
+  justify-items: center;
+  gap: min(3vh, 28px);
+  background:
+    linear-gradient(180deg, rgba(237, 29, 36, 0.9), rgba(245, 173, 15, 0.78)),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 62px);
+}
+
+.video-fallback img {
+  width: min(52vw, 46vh);
+  max-height: 27vh;
+  object-fit: contain;
+  filter: drop-shadow(0 22px 26px rgba(0, 0, 0, 0.38));
+}
+
+.screen-scrim {
+  z-index: 2;
+  background: linear-gradient(180deg, rgba(21, 21, 21, 0.72), rgba(21, 21, 21, 0.22) 46%, rgba(21, 21, 21, 0.86));
+}
+
+.portrait-shell {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  align-content: space-between;
+  gap: clamp(18px, 2.4vh, 38px);
+  width: min(100vw, calc(100vh * 0.401));
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: clamp(18px, 3.2vh, 42px);
+}
+
+.brand-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 58px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--red);
+  color: #fff;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22);
+}
+
+.brand-bar strong {
+  font-size: clamp(1rem, 2.2vh, 1.8rem);
+  line-height: 0.95;
+}
+
+.brand-bar span {
+  color: #fff7e8;
+  font-weight: 900;
+  text-align: right;
+}
+
+.eyebrow {
+  display: block;
+  margin: 0 0 8px;
+  color: var(--gold);
+  font-size: clamp(0.76rem, 1.35vh, 1rem);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.cta-block h1,
+.lobby-copy h1,
+.game-over-copy h1 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.4rem, 6.4vh, 5.8rem);
+  line-height: 0.9;
+}
+
+.cta-block p,
+.lobby-copy p,
+.game-over-copy p {
+  margin: 14px 0 0;
+  color: rgba(255, 247, 232, 0.88);
+  font-size: clamp(1rem, 2vh, 1.55rem);
+  line-height: 1.28;
+}
+
+.qr-panel,
+.mini-qr {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 247, 232, 0.96);
+  color: var(--ink);
+  box-shadow: 0 24px 58px rgba(0, 0, 0, 0.28);
+}
+
+.qr-panel canvas,
+.qr-panel img,
+.mini-qr canvas {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  border-radius: 6px;
+}
+
+.qr-panel.compact {
+  width: min(100%, 280px);
+  justify-self: center;
+}
+
+.qr-panel strong {
+  font-size: clamp(1.2rem, 2.1vh, 1.7rem);
+}
+
+.join-url {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: #3a332d;
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.game-code {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--gold);
+  font-weight: 1000;
+}
+
+.lobby-view,
+.game-over-view,
+.battle-view {
+  background:
+    radial-gradient(circle at 50% 10%, rgba(245, 173, 15, 0.32), transparent 34%),
+    linear-gradient(180deg, #2a1814, #151515 55%, #271a13);
+}
+
+.lobby-slots {
+  display: grid;
+  gap: 14px;
+}
+
+.lobby-slot {
+  display: grid;
+  gap: 6px;
+  padding: 18px;
+  border: 2px dashed rgba(255, 247, 232, 0.35);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.lobby-slot.filled {
+  border-style: solid;
+  border-color: var(--gold);
+}
+
+.lobby-slot span,
+.combat-label span,
+.turn-badge span {
+  color: var(--gold);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.lobby-slot strong {
+  font-size: clamp(1.55rem, 3vh, 2.4rem);
+}
+
+.battle-shell {
+  align-content: start;
+}
+
+.battle-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.battle-topbar strong {
+  display: block;
+  font-size: clamp(1.2rem, 2.7vh, 2.3rem);
+}
+
+.turn-badge {
+  display: grid;
+  justify-items: center;
+  min-width: 82px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.turn-badge strong {
+  color: #fff;
+  font-size: clamp(1.6rem, 4vh, 3.4rem);
+  line-height: 1;
+}
+
+.battle-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.86fr) minmax(0, 1fr);
+  align-items: center;
+  gap: min(2vh, 18px);
+}
+
+.player-cards,
+.party-stack {
+  display: grid;
+  gap: min(2vh, 18px);
+}
+
+.combat-card {
+  --fighter-color: var(--red);
+  --fighter-accent: var(--gold);
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-bottom: 5px solid var(--fighter-accent);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.05));
+}
+
+.combat-card.down {
+  opacity: 0.56;
+}
+
+.combat-label {
+  display: grid;
+  gap: 2px;
+}
+
+.combat-label strong {
+  overflow-wrap: anywhere;
+  color: #fff;
+  font-size: clamp(1rem, 2.1vh, 1.8rem);
+  line-height: 1.02;
+}
+
+.hp-row {
+  display: grid;
+  grid-template-columns: auto minmax(62px, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.hp-track {
+  width: 100%;
+  height: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.hp-fill {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--green), var(--gold), var(--red));
+  transition: width 260ms ease;
+}
+
+.combat-art {
+  justify-self: center;
+  width: 100%;
+  max-width: min(25vh, 230px);
+  max-height: min(21vh, 210px);
+  object-fit: contain;
+  filter: drop-shadow(0 20px 20px rgba(0, 0, 0, 0.34));
+}
+
+.monster-card {
+  min-height: min(52vh, 520px);
+  justify-content: center;
+}
+
+.monster-art {
+  max-width: min(34vh, 310px);
+  max-height: min(33vh, 330px);
+}
+
+.effect-line,
+.locked-move,
+.last-moves {
+  min-height: 20px;
+  color: rgba(255, 247, 232, 0.86);
+  font-size: clamp(0.74rem, 1.35vh, 0.95rem);
+  font-weight: 800;
+}
+
+.locked-move,
+.last-moves {
+  color: var(--gold);
+}
+
+.screen-message {
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  min-height: clamp(128px, 18vh, 230px);
+  padding: clamp(16px, 2.5vh, 28px);
+  border: 2px solid rgba(255, 247, 232, 0.5);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.32);
+  text-align: center;
+}
+
+.screen-message > p {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.25rem, 2.8vh, 2.55rem);
+  font-weight: 1000;
+  line-height: 1.08;
+}
+
+.battle-log {
+  display: grid;
+  gap: 4px;
+}
+
+.battle-log p {
+  margin: 0;
+  color: rgba(255, 247, 232, 0.78);
+  font-size: clamp(0.74rem, 1.35vh, 1rem);
+  line-height: 1.22;
+}
+
+.mini-qr {
+  position: absolute;
+  right: clamp(10px, 2vh, 22px);
+  bottom: clamp(10px, 2vh, 22px);
+  width: clamp(90px, 11vh, 146px);
+  padding: 8px;
+}
+
+.mini-qr span {
+  color: var(--ink);
+  font-size: 0.7rem;
+  font-weight: 1000;
+}
+
+.staff-controls {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  z-index: 20;
+  display: flex;
+  gap: 8px;
+  opacity: 0.14;
+  transition: opacity 160ms ease;
+}
+
+.staff-controls:hover,
+.staff-controls:focus-within {
+  opacity: 1;
+}
+
+.staff-controls button,
+.join-form button,
+.character-card,
+#startSoloButton,
+#confirmCharacterButton,
+#playAgainButton,
+.move-button {
+  min-height: 44px;
+  border-radius: 8px;
+  background: var(--gold);
+  color: var(--ink);
+  font-weight: 1000;
+}
+
+.staff-controls button {
+  padding: 0 12px;
+}
+
+.controller-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, var(--red), var(--gold));
+  color: var(--ink);
+}
+
+.phone-shell {
+  width: min(720px, 100%);
+  min-height: 100vh;
+  margin: 0 auto;
+  background: #ececec;
+}
+
+.monster-phone-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 86px;
+  padding: 14px 18px;
+  background: var(--red);
+  color: #fff;
+}
+
+.monster-phone-header strong {
+  font-size: 1.05rem;
+  line-height: 0.92;
+}
+
+.monster-phone-header nav {
+  display: flex;
+  gap: 8px;
+}
+
+.monster-phone-header nav span {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.phone-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px 0;
+}
+
+.connection-dot {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(237, 29, 36, 0.14);
+  color: var(--red);
+  font-weight: 900;
+}
+
+.connection-dot.online {
+  background: rgba(50, 210, 123, 0.18);
+  color: #137a44;
+}
+
+.phone-panel {
+  display: grid;
+  gap: 16px;
+  margin: 14px;
+  padding: 16px;
+  border: 1px solid rgba(21, 21, 21, 0.18);
+  border-radius: 8px;
+  background: #d8d8d8;
+  color: var(--ink);
+}
+
+.phone-panel h1 {
+  margin: 0;
+  font-size: clamp(1.75rem, 8vw, 2.9rem);
+  line-height: 1.03;
+}
+
+.phone-panel h2 {
+  margin: 0;
+}
+
+.phone-panel p {
+  margin: 0;
+  color: rgba(21, 21, 21, 0.72);
+  line-height: 1.35;
+}
+
+.join-form {
+  display: grid;
+  gap: 10px;
+}
+
+.join-form input {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 14px;
+  border: 1px solid rgba(21, 21, 21, 0.22);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  outline: 0;
+}
+
+.phone-lobby-slots {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.phone-lobby-slot {
+  display: grid;
+  gap: 4px;
+  min-height: 82px;
+  padding: 12px;
+  border: 2px dashed rgba(21, 21, 21, 0.32);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.44);
+}
+
+.phone-lobby-slot.filled {
+  border-style: solid;
+  border-color: var(--red);
+}
+
+.phone-lobby-slot span {
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.phone-lobby-slot strong {
+  align-self: end;
+  font-size: 1.1rem;
+}
+
+.character-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.character-card {
+  --fighter-color: var(--red);
+  --fighter-accent: var(--gold);
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+  min-height: 208px;
+  padding: 10px;
+  border: 1px solid rgba(21, 21, 21, 0.2);
+  background: #d2d2d2;
+  text-align: left;
+}
+
+.character-card:hover,
+.character-card:focus-visible {
+  outline: 3px solid var(--red);
+}
+
+.character-card img {
+  justify-self: center;
+  width: 100%;
+  height: 114px;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.18));
+}
+
+.character-card span,
+.character-card small {
+  color: rgba(21, 21, 21, 0.72);
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 1.18;
+}
+
+.character-card strong {
+  font-size: 0.98rem;
+}
+
+.selected-character-card {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid rgba(21, 21, 21, 0.38);
+  border-radius: 8px;
+  background: #d2d2d2;
+  text-align: center;
+}
+
+.selected-character-card img {
+  width: min(250px, 76vw);
+  height: 220px;
+  object-fit: contain;
+}
+
+.selected-character-card dl {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  margin: 0;
+  text-align: left;
+}
+
+.selected-character-card dl div {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 10px;
+}
+
+.selected-character-card dt {
+  font-weight: 900;
+}
+
+.selected-character-card dd {
+  margin: 0;
+}
+
+.battle-phone-panel {
+  background: #f2f2f2;
+}
+
+.phone-battle-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.phone-battle-head span,
+.phone-battle-head strong {
+  color: var(--red);
+  font-weight: 1000;
+}
+
+.phone-team-status {
+  display: grid;
+  gap: 10px;
+}
+
+.phone-fighter-strip {
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid rgba(21, 21, 21, 0.14);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.phone-fighter-strip.self {
+  border-color: var(--red);
+}
+
+.phone-fighter-strip img {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+}
+
+.phone-fighter-strip span,
+.phone-fighter-strip small {
+  color: rgba(21, 21, 21, 0.64);
+  font-weight: 800;
+}
+
+.phone-monster-status {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.phone-monster-status span,
+.phone-monster-status strong {
+  font-weight: 1000;
+}
+
+.move-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.move-button {
+  display: grid;
+  gap: 4px;
+  min-height: 58px;
+  padding: 10px 14px;
+  border: 1px solid rgba(21, 21, 21, 0.32);
+  background: #fff;
+  text-align: center;
+}
+
+.move-button strong {
+  font-size: clamp(1.15rem, 6vw, 1.75rem);
+  line-height: 1;
+}
+
+.move-button span {
+  color: rgba(21, 21, 21, 0.7);
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
+
+.effects-box {
+  min-height: 136px;
+  padding: 10px;
+  border: 1px solid rgba(21, 21, 21, 0.42);
+  background: #fff;
+}
+
+.effects-box h2 {
+  font-size: 1.4rem;
+}
+
+#startSoloButton,
+#confirmCharacterButton,
+#playAgainButton,
+.join-form button {
+  width: 100%;
+}
+
+@media (orientation: landscape) and (min-width: 900px) {
+  .screen-page .portrait-shell {
+    width: min(520px, 100vw);
+  }
+}
+
+@media (max-width: 440px) {
+  .phone-panel {
+    margin: 10px;
+    padding: 12px;
+  }
+
+  .monster-phone-header nav span {
+    width: 34px;
+  }
+
+  .character-grid {
+    gap: 8px;
+  }
+
+  .character-card {
+    min-height: 188px;
+  }
+
+  .character-card img {
+    height: 96px;
+  }
+}

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 540" role="img" aria-labelledby="title desc">
+  <title id="title">Noodle Ninja</title>
+  <desc id="desc">A stylized fast fighter character with a bowl and orange accents.</desc>
+  <defs>
+    <linearGradient id="suit" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#1b998b"/>
+      <stop offset="1" stop-color="#172a3a"/>
+    </linearGradient>
+    <linearGradient id="noodles" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#ffe66d"/>
+      <stop offset="1" stop-color="#ff9f1c"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="240" cy="502" rx="132" ry="24" fill="#101014" opacity=".28"/>
+  <path d="M128 522c11-111 50-193 112-245 62 52 101 134 112 245z" fill="url(#suit)"/>
+  <rect x="142" y="158" width="196" height="168" rx="72" fill="#d39a78"/>
+  <path d="M129 219c25-93 92-134 201-122 32 35 40 81 24 137-75-35-150-40-225-15z" fill="#172a3a"/>
+  <path d="M137 224c64-25 132-24 206 1" fill="none" stroke="#ff9f1c" stroke-width="28" stroke-linecap="round"/>
+  <circle cx="198" cy="258" r="12" fill="#101014"/>
+  <circle cx="281" cy="258" r="12" fill="#101014"/>
+  <path d="M215 300c18 10 43 10 66 0" fill="none" stroke="#101014" stroke-width="10" stroke-linecap="round"/>
+  <path d="M148 347c-64 18-105 56-121 114 42 8 89-4 140-35z" fill="#1b998b"/>
+  <path d="M332 347c64 18 105 56 121 114-42 8-89-4-140-35z" fill="#172a3a"/>
+  <path d="M117 424l101-74" stroke="#f7f3ea" stroke-width="18" stroke-linecap="round"/>
+  <path d="M363 424l-101-74" stroke="#f7f3ea" stroke-width="18" stroke-linecap="round"/>
+  <path d="M177 408c35-36 91-36 126 0v64H177z" fill="#f7f3ea"/>
+  <path d="M185 414c31 20 80 20 110 0" fill="none" stroke="url(#noodles)" stroke-width="18" stroke-linecap="round"/>
+  <path d="M199 445c24 12 58 12 82 0" fill="none" stroke="url(#noodles)" stroke-width="12" stroke-linecap="round"/>
+</svg>

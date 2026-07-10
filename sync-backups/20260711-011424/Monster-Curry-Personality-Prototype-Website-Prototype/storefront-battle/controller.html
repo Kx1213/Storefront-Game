@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Monster Curry Battle Controller</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="./styles.css">
+    <script type="module" src="./src/controller.js"></script>
+  </head>
+  <body class="controller-page">
+    <main class="phone-shell">
+      <header class="monster-phone-header">
+        <strong>MONSTER<br>CURRY</strong>
+        <nav aria-label="Social links">
+          <span>TikTok</span>
+          <span>IG</span>
+          <span>FB</span>
+        </nav>
+      </header>
+
+      <section class="phone-status-bar">
+        <span id="controllerGameCode" class="game-code">STORE</span>
+        <span id="phoneConnection" class="connection-dot">Offline</span>
+      </section>
+
+      <section id="joinPanel" class="phone-panel">
+        <h1>Join storefront battle</h1>
+        <form id="joinForm" class="join-form">
+          <input id="manualGameId" name="gameId" autocomplete="off" placeholder="storefront-1">
+          <button type="submit">Join</button>
+        </form>
+      </section>
+
+      <section id="lobbyPanel" class="phone-panel" hidden>
+        <h1>Waiting for other players to join</h1>
+        <p id="lobbyPhoneMessage">You can start alone, or wait for a second player to scan the code.</p>
+        <div id="phoneLobbySlots" class="phone-lobby-slots"></div>
+        <button id="startSoloButton" type="button">Start Single Player</button>
+      </section>
+
+      <section id="characterPanel" class="phone-panel" hidden>
+        <h1>Choose Your Curry Personality Character!</h1>
+        <div id="characterGrid" class="character-grid"></div>
+
+        <article id="selectedCharacterCard" class="selected-character-card" hidden>
+          <img id="selectedCharacterArt" alt="">
+          <h2 id="selectedCharacterName">Character</h2>
+          <p id="selectedCharacterTitle">Title</p>
+          <dl>
+            <div>
+              <dt>HP</dt>
+              <dd id="selectedCharacterHp">0</dd>
+            </div>
+            <div>
+              <dt>Attack</dt>
+              <dd id="selectedCharacterAtk">0</dd>
+            </div>
+            <div>
+              <dt>Moveset</dt>
+              <dd id="selectedCharacterMoves">Moves</dd>
+            </div>
+          </dl>
+          <button id="confirmCharacterButton" type="button">Confirm</button>
+        </article>
+      </section>
+
+      <section id="battlePanel" class="phone-panel battle-phone-panel" hidden>
+        <div class="phone-battle-head">
+          <div>
+            <span id="phoneMode">Solo Mode</span>
+            <h1 id="movePrompt">Choose Your Move!</h1>
+          </div>
+          <strong id="phoneTurn">Turn 1</strong>
+        </div>
+
+        <div id="phoneTeamStatus" class="phone-team-status"></div>
+
+        <article class="phone-monster-status">
+          <span id="phoneEnemyName">Monster</span>
+          <div class="hp-track">
+            <div id="phoneEnemyHpBar" class="hp-fill"></div>
+          </div>
+          <strong id="phoneEnemyHpText">0 / 0</strong>
+        </article>
+
+        <div id="moveGrid" class="move-grid"></div>
+
+        <section class="effects-box">
+          <h2>Effects</h2>
+          <p id="phoneRoundMessage">Pick your next action.</p>
+        </section>
+      </section>
+
+      <section id="waitingPanel" class="phone-panel" hidden>
+        <h1>Battle in progress</h1>
+        <p>This screen already has its players. Wait for the next round or ask staff to reset.</p>
+      </section>
+
+      <section id="gameOverPanel" class="phone-panel" hidden>
+        <h1 id="phoneWinnerText">Battle complete</h1>
+        <p id="phoneGameOverMessage">Thanks for playing.</p>
+        <button id="playAgainButton" type="button">Play again</button>
+      </section>
+    </main>
+  </body>
+</html>
