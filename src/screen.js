@@ -121,8 +121,10 @@ function playerCard(player, pendingMoves) {
     </div>
     <div class="hp-row">
       <span>HP</span>
-      <div class="hp-track"><div class="hp-fill" style="width:${hpPercent(player)}%"></div></div>
-      <strong>${player.hp}/${player.maxHp}</strong>
+      <div class="hp-track">
+        <div class="hp-fill" style="width:${hpPercent(player)}%"></div>
+        <strong class="hp-value">${player.hp}/${player.maxHp}</strong>
+      </div>
     </div>
     <img class="combat-art" src="${player.asset}" alt="${player.name}">
     <div class="effect-line">${effectText(player)}</div>

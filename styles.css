@@ -281,7 +281,7 @@ button:disabled {
 
 .battle-layout {
   display: grid;
-  grid-template-columns: minmax(0, 0.86fr) minmax(0, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: center;
   gap: min(2vh, 18px);
 }
@@ -323,7 +323,7 @@ button:disabled {
 
 .hp-row {
   display: grid;
-  grid-template-columns: auto minmax(62px, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: 6px;
   color: #fff;
@@ -332,8 +332,9 @@ button:disabled {
 }
 
 .hp-track {
+  position: relative;
   width: 100%;
-  height: 12px;
+  height: 18px;
   overflow: hidden;
   border: 1px solid rgba(0, 0, 0, 0.28);
   border-radius: 999px;
@@ -348,6 +349,18 @@ button:disabled {
   transition: width 260ms ease;
 }
 
+.hp-value {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  color: #111;
+  font-size: clamp(0.62rem, 1.05vh, 0.82rem);
+  line-height: 1;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.72);
+}
+
 .combat-art {
   justify-self: center;
   width: 100%;
@@ -360,6 +373,20 @@ button:disabled {
 .monster-card {
   min-height: min(42vh, 430px);
   justify-content: center;
+}
+
+.player-card:only-child {
+  min-height: min(42vh, 430px);
+  justify-content: center;
+  justify-items: center;
+  text-align: center;
+}
+
+.player-card:only-child .combat-label,
+.player-card:only-child .hp-row,
+.player-card:only-child .effect-line,
+.player-card:only-child .locked-move {
+  width: 100%;
 }
 
 .monster-art {

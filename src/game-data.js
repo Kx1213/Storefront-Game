@@ -387,9 +387,9 @@ export const CHARACTERS = Object.freeze([
 
 export const LEVELS = Object.freeze({
   solo: [
-    { name: "Level 1: Curry Scout", maxHp: 820, atk: 70, moves: ["monster-claw", "curry-splash"] },
-    { name: "Level 2: Sauce Brute", maxHp: 1050, atk: 78, moves: ["monster-claw", "curry-splash", "monster-guard"] },
-    { name: "Level 3: Spice Crusher", maxHp: 1320, atk: 86, moves: ["pot-slam", "spice-roar", "monster-guard"] },
+    { name: "Level 1: Curry Scout", maxHp: 500, atk: 70, moves: ["monster-claw", "curry-splash"] },
+    { name: "Level 2: Sauce Brute", maxHp: 700, atk: 78, moves: ["monster-claw", "curry-splash"] },
+    { name: "Level 3: Spice Crusher", maxHp: 900, atk: 86, moves: ["pot-slam", "spice-roar"] },
     { name: "Level 4: Monster Curry Titan", maxHp: 1580, atk: 94, moves: ["pot-slam", "curry-splash", "mega-stomp"] },
     { name: "Level 5: Final Curry Monster", maxHp: 1900, atk: 104, moves: ["mega-stomp", "spice-roar", "monster-guard"] }
   ],
