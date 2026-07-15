@@ -1,7 +1,7 @@
 import { get, onValue, ref, remove, serverTimestamp, set, update } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 import { db } from "./firebase.js";
 import { allAlivePlayersHaveMoves, prepareNextLevel, resolveRound } from "./battle-engine.js";
-import { getLevelCount, getMove } from "./game-data.js";
+import { CHARACTERS, LEVELS, getLevelCount, getMove } from "./game-data.js";
 import {
   createAttractSession,
   formatGameCode,
@@ -15,6 +15,9 @@ import {
 const DESIGN_WIDTH = 577;
 const DESIGN_HEIGHT = 1439;
 const SCREEN_GAME_STORAGE_KEY = "storefront-screen-game";
+const BATTLE_BACKGROUND_HANDOFF_LEAD_SECONDS = 0.16;
+const WEBSITE_URL = "https://reito-bt.github.io/Monster-Curry-Personality-Prototype-Website/";
+const IDLE_IMPACT_WORDS = ["BAM!", "SIZZLE!", "CRUNCH!", "POW!", "SLASH!", "BOOM!"];
 
 const $ = (id) => document.getElementById(id);
 const elements = {
@@ -23,6 +26,16 @@ const elements = {
   battleView: $("battleView"),
   gameOverView: $("gameOverView"),
   attractVideo: $("attractVideo"),
+  websiteQr: $("websiteQr"),
+  websiteQrFallback: $("websiteQrFallback"),
+  idleBattleMove: $("idleBattleMove"),
+  idlePlayerFighter: $("idlePlayerFighter"),
+  idlePlayerArt: $("idlePlayerArt"),
+  idleMonsterFighter: $("idleMonsterFighter"),
+  monsterCard: $("monsterCard"),
+  liveBattleMove: $("liveBattleMove"),
+  liveBattleImpact: $("liveBattleImpact"),
+  battleBackgroundVideos: [$("battleBackgroundVideoA"), $("battleBackgroundVideoB")],
   gameCodeLabel: $("gameCodeLabel"),
   lobbyCode: $("lobbyCode"),
   lobbyJoinCode: $("lobbyJoinCode"),
@@ -59,6 +72,17 @@ let gameCode = null;
 let sessionRef = null;
 let unsubscribe = null;
 let rotatingSession = false;
+let battleBackgroundRunning = false;
+let activeBattleBackgroundIndex = 0;
+let battleBackgroundHandoffInProgress = false;
+let battleBackgroundMonitor = null;
+let battleBackgroundPreload = null;
+let idleBattleTimer = null;
+let idleBattleState = null;
+let liveBattleAnimationToken = null;
+let lastBattleSnapshot = null;
+let gameOverRevealTimer = null;
+const liveBattleTimers = new Set();
 
 function updateScreenScale() {
   const scale = Math.min(window.innerWidth / DESIGN_WIDTH, window.innerHeight / DESIGN_HEIGHT);
@@ -98,11 +122,408 @@ function updateGameCodeLabels(state = null) {
   elements.gameOverCode.textContent = state?.status === "game-over" ? "New code soon" : gameCode || "----";
 }
 
+function randomItem(items) {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function renderWebsiteQr() {
+  if (!elements.websiteQr) {
+    return;
+  }
+
+  if (window.QRious) {
+    elements.websiteQr.hidden = false;
+    elements.websiteQrFallback.hidden = true;
+    new window.QRious({
+      element: elements.websiteQr,
+      value: WEBSITE_URL,
+      size: 260,
+      level: "H",
+      background: "white",
+      foreground: "#151515"
+    });
+    return;
+  }
+
+  elements.websiteQr.hidden = true;
+  elements.websiteQrFallback.hidden = false;
+  elements.websiteQrFallback.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(WEBSITE_URL)}`;
+}
+
+function animateIdleElement(element, className, duration = 720) {
+  if (!element) {
+    return;
+  }
+
+  element.classList.remove(className);
+  void element.offsetWidth;
+  element.classList.add(className);
+  window.setTimeout(() => element.classList.remove(className), duration);
+}
+
+function updateIdleBattleDisplay() {
+  const state = idleBattleState;
+  if (!state) {
+    return;
+  }
+
+  elements.idlePlayerArt.src = state.character.asset;
+  elements.idlePlayerArt.alt = state.character.name;
+}
+
+function showIdleBattleMove(moveName) {
+  elements.idleBattleMove.textContent = moveName;
+  animateIdleElement(elements.idleBattleMove, "is-showing", 1080);
+}
+
+function scheduleIdleBattleStep(delay) {
+  window.clearTimeout(idleBattleTimer);
+  idleBattleTimer = window.setTimeout(() => {
+    idleBattleTimer = null;
+    runIdleBattleStep();
+  }, delay);
+}
+
+function resetIdleBattle() {
+  const character = randomItem(CHARACTERS);
+  const monster = randomItem(LEVELS.solo);
+  idleBattleState = {
+    character,
+    monster,
+    playerHp: 100,
+    monsterHp: 100,
+    playerTurn: Math.random() >= 0.35
+  };
+
+  elements.idlePlayerFighter.classList.remove("is-attacking", "is-hit", "is-victorious", "is-defeated");
+  elements.idleMonsterFighter.classList.remove("is-attacking", "is-hit", "is-victorious", "is-defeated");
+  showIdleBattleMove(`${character.name} enters the arena!`);
+  updateIdleBattleDisplay();
+}
+
+function runIdleBattleStep() {
+  if (elements.attractView.hidden) {
+    return;
+  }
+
+  if (!idleBattleState) {
+    resetIdleBattle();
+  }
+
+  const state = idleBattleState;
+  const playerAttacks = state.playerTurn;
+  const attacker = playerAttacks ? elements.idlePlayerFighter : elements.idleMonsterFighter;
+  const defender = playerAttacks ? elements.idleMonsterFighter : elements.idlePlayerFighter;
+  const moveIds = playerAttacks ? state.character.moves : state.monster.moves;
+  const move = getMove(randomItem(moveIds));
+  const damage = Math.floor(15 + Math.random() * 18);
+
+  if (playerAttacks) {
+    state.monsterHp = Math.max(0, state.monsterHp - damage);
+  } else {
+    state.playerHp = Math.max(0, state.playerHp - damage);
+  }
+
+  showIdleBattleMove(move?.name || "Power attack");
+  animateIdleElement(attacker, "is-attacking");
+  animateIdleElement(defender, "is-hit", 560);
+  updateIdleBattleDisplay();
+
+  const battleEnded = state.playerHp <= 0 || state.monsterHp <= 0;
+  if (battleEnded) {
+    const playerWon = state.monsterHp <= 0;
+    const winner = playerWon ? elements.idlePlayerFighter : elements.idleMonsterFighter;
+    const defeated = playerWon ? elements.idleMonsterFighter : elements.idlePlayerFighter;
+    showIdleBattleMove(playerWon ? `${state.character.name} wins!` : "Monster wins!");
+    winner.classList.add("is-victorious");
+    defeated.classList.add("is-defeated");
+    scheduleIdleBattleStep(1650);
+    idleBattleState = null;
+    return;
+  }
+
+  state.playerTurn = !state.playerTurn;
+  scheduleIdleBattleStep(1050 + Math.floor(Math.random() * 500));
+}
+
+function startIdleBattle() {
+  if (idleBattleTimer) {
+    return;
+  }
+
+  resetIdleBattle();
+  scheduleIdleBattleStep(700);
+}
+
+function stopIdleBattle() {
+  window.clearTimeout(idleBattleTimer);
+  idleBattleTimer = null;
+  idleBattleState = null;
+  elements.idlePlayerFighter.classList.remove("is-attacking", "is-hit", "is-victorious", "is-defeated");
+  elements.idleMonsterFighter.classList.remove("is-attacking", "is-hit", "is-victorious", "is-defeated");
+}
+
+function scheduleLiveBattleAnimation(callback, delay) {
+  const timer = window.setTimeout(() => {
+    liveBattleTimers.delete(timer);
+    callback();
+  }, delay);
+  liveBattleTimers.add(timer);
+}
+
+function clearLiveBattleAnimations() {
+  liveBattleTimers.forEach((timer) => window.clearTimeout(timer));
+  liveBattleTimers.clear();
+  liveBattleAnimationToken = null;
+  lastBattleSnapshot = null;
+  elements.liveBattleMove.classList.remove("is-showing");
+  elements.liveBattleImpact.classList.remove("is-bursting");
+}
+
+function getPlayerBattleCard(playerId) {
+  return Array.from(elements.playerCards.children)
+    .find((card) => card.dataset.playerId === playerId) || null;
+}
+
+function showLiveBattleAction(moveName, impact = null) {
+  elements.liveBattleMove.textContent = moveName;
+  animateIdleElement(elements.liveBattleMove, "is-showing", 1080);
+  if (impact) {
+    elements.liveBattleImpact.textContent = impact;
+    animateIdleElement(elements.liveBattleImpact, "is-bursting", 700);
+  }
+}
+
+function captureBattleSnapshot(state) {
+  return {
+    roundResultCreatedAt: state.roundResult?.createdAt || null,
+    monsterHp: Number(state.monster?.hp || 0),
+    players: Object.fromEntries(getOrderedPlayers(state).map((player) => [player.id, Number(player.hp || 0)]))
+  };
+}
+
+function animateResolvingMoves(state) {
+  if (state.status !== "resolving") {
+    return;
+  }
+
+  const activeMoves = state.activeMoves || {};
+  const token = Object.values(activeMoves).map((entry) => entry.token).filter(Boolean).sort().join("|");
+  if (!token || liveBattleAnimationToken === token) {
+    return;
+  }
+
+  liveBattleAnimationToken = token;
+  const actions = getOrderedPlayers(state)
+    .map((player) => ({ player, move: getMove(activeMoves[player.id]?.moveId) }))
+    .filter((action) => action.move && action.player.hp > 0);
+
+  actions.forEach(({ player, move }, index) => {
+    scheduleLiveBattleAnimation(() => {
+      if (elements.battleView.hidden) {
+        return;
+      }
+
+      const playerCard = getPlayerBattleCard(player.id);
+      showLiveBattleAction(move.name, randomItem(IDLE_IMPACT_WORDS));
+      animateIdleElement(playerCard, "is-live-attacking", 680);
+      if (move.power || move.hits) {
+        animateIdleElement(elements.monsterCard, "is-live-hit", 580);
+      }
+    }, 120 + index * 780);
+  });
+}
+
+function monsterMoveNameFromMessages(monsterName, messages) {
+  const prefix = `${monsterName} used `;
+  const message = messages.find((entry) => entry.startsWith(prefix));
+  if (!message) {
+    return messages.some((entry) => entry.startsWith(`${monsterName} gained `))
+      ? getMove("monster-guard")?.name || "Monster Guard"
+      : null;
+  }
+
+  const remainder = message.slice(prefix.length);
+  return remainder.split(" on ")[0].split(".")[0];
+}
+
+function animateRoundOutcome(state, previousSnapshot) {
+  const roundResultCreatedAt = state.roundResult?.createdAt || null;
+  if (!previousSnapshot || !roundResultCreatedAt || previousSnapshot.roundResultCreatedAt === roundResultCreatedAt) {
+    return;
+  }
+
+  const messages = Array.isArray(state.roundResult?.messages) ? state.roundResult.messages : [];
+  const monsterMoveName = monsterMoveNameFromMessages(state.monster?.name || "", messages);
+  const damagedPlayerIds = getOrderedPlayers(state)
+    .filter((player) => Number(player.hp || 0) < Number(previousSnapshot.players[player.id] ?? player.hp))
+    .map((player) => player.id);
+
+  if (monsterMoveName) {
+    scheduleLiveBattleAnimation(() => {
+      if (elements.battleView.hidden) {
+        return;
+      }
+
+      showLiveBattleAction(monsterMoveName, randomItem(IDLE_IMPACT_WORDS));
+      animateIdleElement(elements.monsterCard, "is-live-attacking", 680);
+      damagedPlayerIds.forEach((playerId) => animateIdleElement(getPlayerBattleCard(playerId), "is-live-hit", 580));
+    }, 100);
+  } else if (Number(state.monster?.hp || 0) <= 0 && previousSnapshot.monsterHp > 0) {
+    scheduleLiveBattleAnimation(() => showLiveBattleAction(`${state.monster.name} defeated!`, "KO!"), 100);
+  }
+}
+
+function cancelBattleBackgroundCallback(callback) {
+  if (!callback) {
+    return;
+  }
+
+  if (callback.cancel) {
+    callback.cancel();
+  } else if (typeof callback.video.cancelVideoFrameCallback === "function") {
+    callback.video.cancelVideoFrameCallback(callback.id);
+  }
+}
+
+function monitorBattleBackground(videoIndex) {
+  const video = elements.battleBackgroundVideos[videoIndex];
+  if (!battleBackgroundRunning || videoIndex !== activeBattleBackgroundIndex || typeof video.requestVideoFrameCallback !== "function") {
+    return;
+  }
+
+  const callback = {
+    video,
+    id: video.requestVideoFrameCallback(() => {
+      if (battleBackgroundMonitor === callback) {
+        battleBackgroundMonitor = null;
+      }
+
+      if (!battleBackgroundRunning || videoIndex !== activeBattleBackgroundIndex) {
+        return;
+      }
+
+      const secondsRemaining = video.duration - video.currentTime;
+      if (Number.isFinite(secondsRemaining) && secondsRemaining <= BATTLE_BACKGROUND_HANDOFF_LEAD_SECONDS) {
+        handOffBattleBackground(videoIndex);
+        return;
+      }
+
+      monitorBattleBackground(videoIndex);
+    })
+  };
+  battleBackgroundMonitor = callback;
+}
+
+function stopBattleBackground() {
+  battleBackgroundRunning = false;
+  battleBackgroundHandoffInProgress = false;
+  cancelBattleBackgroundCallback(battleBackgroundMonitor);
+  cancelBattleBackgroundCallback(battleBackgroundPreload);
+  battleBackgroundMonitor = null;
+  battleBackgroundPreload = null;
+
+  elements.battleBackgroundVideos.forEach((video, index) => {
+    video.pause();
+    video.currentTime = 0;
+    video.classList.toggle("is-active", index === 0);
+  });
+  activeBattleBackgroundIndex = 0;
+}
+
+function handOffBattleBackground(endedIndex) {
+  if (!battleBackgroundRunning || endedIndex !== activeBattleBackgroundIndex || battleBackgroundHandoffInProgress) {
+    return;
+  }
+
+  battleBackgroundHandoffInProgress = true;
+  const currentVideo = elements.battleBackgroundVideos[endedIndex];
+  const nextIndex = activeBattleBackgroundIndex === 0 ? 1 : 0;
+  const nextVideo = elements.battleBackgroundVideos[nextIndex];
+  nextVideo.currentTime = 0;
+
+  const revealNextVideo = () => {
+    battleBackgroundPreload = null;
+    if (!battleBackgroundRunning || endedIndex !== activeBattleBackgroundIndex) {
+      nextVideo.pause();
+      nextVideo.currentTime = 0;
+      battleBackgroundHandoffInProgress = false;
+      return;
+    }
+
+    nextVideo.classList.add("is-active");
+    currentVideo.classList.remove("is-active");
+    activeBattleBackgroundIndex = nextIndex;
+    currentVideo.pause();
+    currentVideo.currentTime = 0;
+    battleBackgroundHandoffInProgress = false;
+    monitorBattleBackground(nextIndex);
+  };
+
+  if (typeof nextVideo.requestVideoFrameCallback === "function") {
+    const callback = {
+      video: nextVideo,
+      id: nextVideo.requestVideoFrameCallback(revealNextVideo)
+    };
+    battleBackgroundPreload = callback;
+  } else {
+    const onPlaying = () => revealNextVideo();
+    nextVideo.addEventListener("playing", onPlaying, { once: true });
+    battleBackgroundPreload = {
+      video: nextVideo,
+      cancel: () => nextVideo.removeEventListener("playing", onPlaying)
+    };
+  }
+
+  nextVideo.play().catch(() => {
+    cancelBattleBackgroundCallback(battleBackgroundPreload);
+    battleBackgroundPreload = null;
+    battleBackgroundHandoffInProgress = false;
+
+    if (battleBackgroundRunning && endedIndex === activeBattleBackgroundIndex) {
+      currentVideo.currentTime = 0;
+      currentVideo.play().then(() => monitorBattleBackground(endedIndex)).catch(() => {});
+    }
+  });
+}
+
+function startBattleBackground() {
+  if (battleBackgroundRunning) {
+    return;
+  }
+
+  battleBackgroundRunning = true;
+  const currentVideo = elements.battleBackgroundVideos[activeBattleBackgroundIndex];
+  currentVideo.play().then(() => {
+    monitorBattleBackground(activeBattleBackgroundIndex);
+  }).catch(() => {
+    // The game stays usable if a browser blocks muted autoplay.
+  });
+}
+
 function setView(viewName) {
-  elements.attractView.hidden = viewName !== "attract";
+  const attractIsActive = viewName === "attract";
+  const battleIsActive = viewName === "battle";
+  elements.attractView.hidden = !attractIsActive;
   elements.lobbyView.hidden = viewName !== "lobby";
-  elements.battleView.hidden = viewName !== "battle";
+  elements.battleView.hidden = !battleIsActive;
   elements.gameOverView.hidden = viewName !== "game-over";
+
+  if (battleIsActive) {
+    startBattleBackground();
+  } else if (battleBackgroundRunning) {
+    stopBattleBackground();
+  }
+
+  if (!battleIsActive) {
+    clearLiveBattleAnimations();
+  }
+
+  if (attractIsActive) {
+    startIdleBattle();
+  } else {
+    stopIdleBattle();
+  }
 }
 
 function effectText(fighter) {
@@ -154,7 +575,8 @@ function renderLobby(state) {
 function playerCard(player, pendingMoves) {
   const move = pendingMoves?.[player.id] ? getMove(pendingMoves[player.id].moveId) : null;
   const card = document.createElement("article");
-  card.className = `combat-card player-card ${player.hp <= 0 ? "down" : ""}`;
+  card.className = `combat-card player-card ${player.hp <= 0 ? "down is-defeated" : ""}`;
+  card.dataset.playerId = player.id;
   card.style.setProperty("--fighter-color", player.color || "#ed1d24");
   card.style.setProperty("--fighter-accent", player.accent || "#f5ad0f");
   card.innerHTML = `
@@ -188,6 +610,7 @@ function renderLog(log) {
 }
 
 function renderBattle(state) {
+  const previousSnapshot = lastBattleSnapshot;
   setView("battle");
   const players = getOrderedPlayers(state);
   const monster = state.monster;
@@ -202,6 +625,7 @@ function renderBattle(state) {
   players.forEach((player) => elements.playerCards.append(playerCard(player, state.pendingMoves || {})));
 
   if (monster) {
+    elements.monsterCard.classList.toggle("is-defeated", monster.hp <= 0);
     elements.monsterName.textContent = monster.name;
     renderHp(elements.monsterHpBar, elements.monsterHpText, monster);
     elements.monsterArt.src = monster.asset;
@@ -213,6 +637,8 @@ function renderBattle(state) {
     elements.battleStatus.textContent = "Resolving moves...";
   } else if (state.status === "level-complete") {
     elements.battleStatus.textContent = "Level cleared. Get ready!";
+  } else if (state.status === "game-over") {
+    elements.battleStatus.textContent = "Final blow!";
   } else {
     elements.battleStatus.textContent = readyCount >= aliveIds.length
       ? "Moves locked. Resolving now!"
@@ -224,6 +650,9 @@ function renderBattle(state) {
     .filter(Boolean);
   elements.lastMoves.textContent = chosenMoves.length ? `Locked moves: ${chosenMoves.join(" + ")}` : "";
   renderLog(state.log);
+  animateResolvingMoves(state);
+  animateRoundOutcome(state, previousSnapshot);
+  lastBattleSnapshot = captureBattleSnapshot(state);
 }
 
 function renderGameOver(state) {
@@ -239,6 +668,11 @@ function renderGameOver(state) {
 function render(state) {
   updateGameCodeLabels(state);
 
+  if (state?.status !== "game-over" && gameOverRevealTimer) {
+    window.clearTimeout(gameOverRevealTimer);
+    gameOverRevealTimer = null;
+  }
+
   if (!state || state.status === "attract") {
     renderAttract();
     return;
@@ -250,6 +684,17 @@ function render(state) {
   }
 
   if (state.status === "game-over") {
+    if (!elements.battleView.hidden) {
+      if (!gameOverRevealTimer) {
+        renderBattle(state);
+        gameOverRevealTimer = window.setTimeout(() => {
+          gameOverRevealTimer = null;
+          renderGameOver(state);
+        }, 1650);
+      }
+      return;
+    }
+
     renderGameOver(state);
     return;
   }
@@ -264,6 +709,9 @@ async function rotateToNewSession() {
 
   rotatingSession = true;
   window.clearTimeout(gameOverTimer);
+  window.clearTimeout(gameOverRevealTimer);
+  gameOverRevealTimer = null;
+  clearLiveBattleAnimations();
   levelAdvanceToken = null;
   resolvingToken = null;
 
@@ -309,6 +757,8 @@ async function resolvePendingMoves(state) {
     lastActionAt: serverTimestamp()
   });
 
+  const animationDelay = 1400 + Math.max(0, getAlivePlayerIds(state).length - 1) * 780;
+
   window.setTimeout(async () => {
     if (gameId !== activeGameId) {
       return;
@@ -340,7 +790,7 @@ async function resolvePendingMoves(state) {
 
     await update(activeSessionRef, updatePayload);
     resolvingToken = null;
-  }, 1200);
+  }, animationDelay);
 }
 
 function scheduleLevelAdvance(state) {
@@ -412,8 +862,14 @@ function bindControls() {
 
 async function boot() {
   updateScreenScale();
+  renderWebsiteQr();
+  startIdleBattle();
   window.addEventListener("resize", updateScreenScale);
+  window.addEventListener("load", renderWebsiteQr, { once: true });
   document.addEventListener("fullscreenchange", updateScreenScale);
+  elements.battleBackgroundVideos.forEach((video, index) => {
+    video.addEventListener("ended", () => handOffBattleBackground(index));
+  });
   bindControls();
 
   const requestedGameId = getGameId(null);

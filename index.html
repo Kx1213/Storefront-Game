@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Monster Curry Storefront Battle</title>
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="./styles.css">
-    <script type="module" src="./src/screen.js"></script>
+    <link rel="stylesheet" href="./styles.css?v=20260715-1730">
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <script type="module" src="./src/screen.js?v=20260715-1730"></script>
   </head>
   <body class="screen-page">
     <main class="screen-app">
@@ -23,13 +24,43 @@
             <span>Storefront Battle</span>
           </div>
 
-          <div class="trailer-safe-zone" aria-hidden="true"></div>
+          <div class="attract-experience">
+            <header class="idle-call-to-action">
+              <span>Ready for a cool experience?</span>
+              <strong>Play. Battle. Unlock rewards.</strong>
+              <p>Join the live Monster Curry battle from your phone.</p>
+            </header>
 
-          <aside class="join-code-panel" aria-label="Join game">
-            <span>Join on the Monster Curry website</span>
-            <span id="gameCodeLabel" class="game-code">----</span>
-            <strong>Tap Battle and enter this code</strong>
-          </aside>
+            <section class="idle-battle-stage" aria-label="Simulated Monster Curry battle preview">
+              <div class="idle-battle-arena">
+                <article id="idlePlayerFighter" class="idle-fighter idle-player-fighter">
+                  <img id="idlePlayerArt" src="./assets/characters/katsu-chan.png" alt="Katsu-Chan">
+                </article>
+
+                <div class="idle-impact-wrap" aria-hidden="true">
+                  <span class="idle-versus">VS</span>
+                </div>
+
+                <article id="idleMonsterFighter" class="idle-fighter idle-monster-fighter">
+                  <img src="./assets/monster-curry-beast.svg" alt="Monster Curry beast">
+                </article>
+              </div>
+
+              <strong id="idleBattleMove" class="idle-battle-move">Katsu-Chan enters the arena!</strong>
+            </section>
+
+            <aside class="join-code-panel attract-join" aria-label="Join game">
+              <div class="website-qr-wrap">
+                <canvas id="websiteQr" width="144" height="144" aria-label="QR code for the Monster Curry website"></canvas>
+                <img id="websiteQrFallback" class="website-qr-fallback" alt="QR code for the Monster Curry website" hidden>
+              </div>
+              <div class="join-instructions">
+                <span class="join-kicker">Join on the Monster Curry website</span>
+                <span id="gameCodeLabel" class="game-code">----</span>
+                <strong>Swipe right and enter the code</strong>
+              </div>
+            </aside>
+          </div>
         </div>
       </section>
 
@@ -56,6 +87,18 @@
       </section>
 
       <section id="battleView" class="display-view battle-view" hidden>
+        <video id="battleBackgroundVideoA" class="battle-background-video is-active" muted playsinline preload="auto" aria-hidden="true">
+          <source src="./assets/battle-background.mp4?v=20260715-1350" type="video/mp4">
+        </video>
+        <video id="battleBackgroundVideoB" class="battle-background-video" muted playsinline preload="auto" aria-hidden="true">
+          <source src="./assets/battle-background.mp4?v=20260715-1350" type="video/mp4">
+        </video>
+        <div class="battle-background-scrim" aria-hidden="true"></div>
+        <div class="live-battle-fx" aria-live="polite" aria-atomic="true">
+          <strong id="liveBattleMove" class="live-battle-move"></strong>
+          <span id="liveBattleImpact" class="live-battle-impact" aria-hidden="true">BAM!</span>
+        </div>
+
         <div class="portrait-shell battle-shell">
           <header class="battle-topbar">
             <div>
@@ -74,7 +117,7 @@
             </section>
 
             <section class="monster-zone" aria-label="Monster">
-              <article class="combat-card monster-card">
+              <article id="monsterCard" class="combat-card monster-card">
                 <div class="combat-label">
                   <span>Monster</span>
                   <strong id="monsterName">Monster</strong>
