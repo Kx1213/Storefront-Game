@@ -11,7 +11,8 @@ Static HTML/CSS/JavaScript storefront battle prototype. The big screen shows a t
 - If a second player enters the code before the solo battle starts, the game switches to co-op automatically.
 - Added 5 solo levels and 5 harder co-op levels.
 - Battle is cooperative: 1 or 2 players fight the monster, reduce monster HP to 0, and advance through levels.
-- The big screen now uses a tall portrait layout for the 577:1439 storefront screen ratio.
+- The big screen uses a fixed 577×1439 design canvas and scales it uniformly, so every display with the same ratio has the same composition.
+- The screen creates a random four-digit game code and replaces it after each completed game.
 - The phone UI follows the red Monster Curry header and character/move flow shown in the PDF.
 
 ## Run Locally
@@ -25,10 +26,10 @@ python -m http.server 8000
 Open the big screen:
 
 ```text
-http://localhost:8000/index.html?gameId=storefront-1
+http://localhost:8000/index.html
 ```
 
-Phones should join through the Monster Curry personality website. Tap the floating `Battle` button there and enter the game code shown on the big screen, for example `STOREFRONT 1`.
+Phones should join through the Monster Curry personality website. Tap the floating `Battle` button there and enter the four-digit code shown on the big screen.
 
 ## Monster Curry Website Integration
 
@@ -38,7 +39,7 @@ The phone controller is integrated into the existing Monster Curry personality w
 D:\Monster-Curry-Personality-Prototype-Website-Prototype
 ```
 
-Serve that website separately, tap the floating `Battle` button, and enter the storefront game code.
+Serve that website separately, tap the floating `Battle` button, and enter the storefront game code. The website only accepts an active four-digit session created by the big screen.
 
 ## Attract Video
 

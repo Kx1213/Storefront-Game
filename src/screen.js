@@ -1,4 +1,4 @@
-import { get, onValue, ref, serverTimestamp, set, update } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+import { get, onValue, ref, remove, serverTimestamp, set, update } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 import { db } from "./firebase.js";
 import { allAlivePlayersHaveMoves, prepareNextLevel, resolveRound } from "./battle-engine.js";
 import { getLevelCount, getMove } from "./game-data.js";
@@ -12,9 +12,9 @@ import {
   hpPercent
 } from "./shared.js";
 
-const gameId = getGameId("storefront-1");
-const gameCode = formatGameCode(gameId);
-const sessionRef = ref(db, `sessions/${gameId}`);
+const DESIGN_WIDTH = 577;
+const DESIGN_HEIGHT = 1439;
+const SCREEN_GAME_STORAGE_KEY = "storefront-screen-game";
 
 const $ = (id) => document.getElementById(id);
 const elements = {
@@ -54,6 +54,49 @@ const elements = {
 let resolvingToken = null;
 let levelAdvanceToken = null;
 let gameOverTimer = null;
+let gameId = null;
+let gameCode = null;
+let sessionRef = null;
+let unsubscribe = null;
+let rotatingSession = false;
+
+function updateScreenScale() {
+  const scale = Math.min(window.innerWidth / DESIGN_WIDTH, window.innerHeight / DESIGN_HEIGHT);
+  document.documentElement.style.setProperty("--screen-scale", String(scale));
+}
+
+function isFourDigitCode(value) {
+  return /^\d{4}$/.test(String(value || ""));
+}
+
+function generateFourDigitCode() {
+  const randomValue = new Uint32Array(1);
+  window.crypto.getRandomValues(randomValue);
+  return String(1000 + (randomValue[0] % 9000));
+}
+
+async function findAvailableGameId(excludedGameId = null) {
+  for (let attempt = 0; attempt < 40; attempt += 1) {
+    const candidate = generateFourDigitCode();
+    if (candidate === excludedGameId) {
+      continue;
+    }
+    const snapshot = await get(ref(db, `sessions/${candidate}`));
+    if (!snapshot.exists()) {
+      return candidate;
+    }
+  }
+
+  throw new Error("Could not allocate a four-digit game code.");
+}
+
+function updateGameCodeLabels(state = null) {
+  elements.gameCodeLabel.textContent = gameCode || "----";
+  elements.lobbyCode.textContent = gameCode || "----";
+  elements.lobbyJoinCode.textContent = gameCode || "----";
+  elements.miniGameCode.textContent = gameCode || "----";
+  elements.gameOverCode.textContent = state?.status === "game-over" ? "New code soon" : gameCode || "----";
+}
 
 function setView(viewName) {
   elements.attractView.hidden = viewName !== "attract";
@@ -189,16 +232,12 @@ function renderGameOver(state) {
   elements.gameOverEyebrow.textContent = playersWon ? "All levels cleared" : "Battle lost";
   elements.winnerText.textContent = playersWon ? "Players win!" : "Monster wins";
   elements.gameOverMessage.textContent = playersWon
-    ? "The curry party cleared all five levels. Enter the code on the website for the next battle."
-    : "The monster held the screen. Enter the code on the website to try again.";
+    ? "The curry party cleared all five levels. A fresh code will appear for the next battle."
+    : "The monster held the screen. A fresh code will appear for the next battle.";
 }
 
 function render(state) {
-  elements.gameCodeLabel.textContent = gameCode;
-  elements.lobbyCode.textContent = gameCode;
-  elements.lobbyJoinCode.textContent = gameCode;
-  elements.miniGameCode.textContent = gameCode;
-  elements.gameOverCode.textContent = gameCode;
+  updateGameCodeLabels(state);
 
   if (!state || state.status === "attract") {
     renderAttract();
@@ -218,11 +257,33 @@ function render(state) {
   renderBattle(state);
 }
 
-async function resetToAttract() {
+async function rotateToNewSession() {
+  if (rotatingSession) {
+    return;
+  }
+
+  rotatingSession = true;
   window.clearTimeout(gameOverTimer);
   levelAdvanceToken = null;
   resolvingToken = null;
-  await set(sessionRef, createAttractSession(gameId, null, serverTimestamp()));
+
+  const previousRef = sessionRef;
+  const previousGameId = gameId;
+  if (unsubscribe) {
+    unsubscribe();
+    unsubscribe = null;
+  }
+
+  try {
+    const nextGameId = await findAvailableGameId(previousGameId);
+    if (previousRef) {
+      await remove(previousRef);
+    }
+
+    await activateSession(nextGameId, true);
+  } finally {
+    rotatingSession = false;
+  }
 }
 
 async function resolvePendingMoves(state) {
@@ -240,14 +301,20 @@ async function resolvePendingMoves(state) {
   }
 
   resolvingToken = token;
-  await update(sessionRef, {
+  const activeGameId = gameId;
+  const activeSessionRef = sessionRef;
+  await update(activeSessionRef, {
     status: "resolving",
     activeMoves: state.pendingMoves,
     lastActionAt: serverTimestamp()
   });
 
   window.setTimeout(async () => {
-    const snapshot = await get(sessionRef);
+    if (gameId !== activeGameId) {
+      return;
+    }
+
+    const snapshot = await get(activeSessionRef);
     const liveState = snapshot.val();
     const liveToken = Object.values(liveState?.pendingMoves || {})
       .map((entry) => entry.token)
@@ -271,7 +338,7 @@ async function resolvePendingMoves(state) {
       updatePayload.gameOverAt = serverTimestamp();
     }
 
-    await update(sessionRef, updatePayload);
+    await update(activeSessionRef, updatePayload);
     resolvingToken = null;
   }, 1200);
 }
@@ -288,15 +355,21 @@ function scheduleLevelAdvance(state) {
   }
 
   levelAdvanceToken = token;
+  const activeGameId = gameId;
+  const activeSessionRef = sessionRef;
   window.setTimeout(async () => {
-    const snapshot = await get(sessionRef);
+    if (gameId !== activeGameId) {
+      return;
+    }
+
+    const snapshot = await get(activeSessionRef);
     const liveState = snapshot.val();
 
     if (!liveState || liveState.status !== "level-complete") {
       return;
     }
 
-    await update(sessionRef, {
+    await update(activeSessionRef, {
       ...prepareNextLevel(liveState),
       lastActionAt: serverTimestamp()
     });
@@ -307,7 +380,9 @@ function scheduleGameOverReset(state) {
   window.clearTimeout(gameOverTimer);
 
   if (state?.status === "game-over") {
-    gameOverTimer = window.setTimeout(resetToAttract, 24000);
+    gameOverTimer = window.setTimeout(() => {
+      rotateToNewSession().catch((error) => console.error("Could not rotate game code", error));
+    }, 24000);
   }
 }
 
@@ -320,7 +395,9 @@ function bindControls() {
     elements.attractVideo.hidden = true;
   });
 
-  elements.resetButton.addEventListener("click", resetToAttract);
+  elements.resetButton.addEventListener("click", () => {
+    rotateToNewSession().catch((error) => console.error("Could not reset game", error));
+  });
   elements.copyJoinButton.addEventListener("click", async () => {
     await navigator.clipboard?.writeText(gameId);
     elements.copyJoinButton.textContent = "Copied";
@@ -334,14 +411,48 @@ function bindControls() {
 }
 
 async function boot() {
+  updateScreenScale();
+  window.addEventListener("resize", updateScreenScale);
+  document.addEventListener("fullscreenchange", updateScreenScale);
   bindControls();
 
-  const snapshot = await get(sessionRef);
-  if (!snapshot.exists()) {
-    await resetToAttract();
+  const requestedGameId = getGameId(null);
+  const storedGameId = window.localStorage.getItem(SCREEN_GAME_STORAGE_KEY);
+  const preferredGameId = isFourDigitCode(requestedGameId)
+    ? requestedGameId
+    : isFourDigitCode(storedGameId)
+      ? storedGameId
+      : null;
+
+  if (preferredGameId) {
+    const snapshot = await get(ref(db, `sessions/${preferredGameId}`));
+    const state = snapshot.val();
+    if (state && !["closed", "game-over"].includes(state.status)) {
+      await activateSession(preferredGameId, false);
+      return;
+    }
   }
 
-  onValue(sessionRef, (nextSnapshot) => {
+  await activateSession(await findAvailableGameId(), true);
+}
+
+async function activateSession(nextGameId, createNew) {
+  gameId = nextGameId;
+  gameCode = formatGameCode(gameId);
+  sessionRef = ref(db, `sessions/${gameId}`);
+  window.localStorage.setItem(SCREEN_GAME_STORAGE_KEY, gameId);
+  updateGameCodeLabels();
+
+  if (createNew) {
+    await set(sessionRef, createAttractSession(gameId, null, serverTimestamp()));
+  }
+
+  const activeGameId = gameId;
+  unsubscribe = onValue(sessionRef, (nextSnapshot) => {
+    if (gameId !== activeGameId) {
+      return;
+    }
+
     const state = nextSnapshot.val();
     render(state);
     scheduleLevelAdvance(state);

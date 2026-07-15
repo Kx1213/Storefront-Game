@@ -42,13 +42,29 @@ button:disabled {
 }
 
 .screen-page {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
   overflow: hidden;
   background: #151515;
 }
 
-.screen-app,
-.display-view {
-  min-height: 100vh;
+.screen-page .screen-app {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 577px;
+  height: 1439px;
+  min-height: 0;
+  overflow: hidden;
+  transform: translate(-50%, -50%) scale(var(--screen-scale, 1));
+  transform-origin: center;
+}
+
+.screen-page .display-view {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
 }
 
 .display-view {
@@ -87,20 +103,21 @@ button:disabled {
   z-index: 3;
   display: grid;
   align-content: space-between;
-  gap: clamp(18px, 2.4vh, 38px);
-  width: min(100vw, calc(100vh * 0.401));
-  min-height: 100vh;
+  gap: 34.536px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
   margin: 0 auto;
-  padding: clamp(14px, 2.4vh, 30px);
+  padding: 30px;
 }
 
 .attract-shell {
-  grid-template-rows: auto minmax(42vh, 1fr) auto;
+  grid-template-rows: auto minmax(604.38px, 1fr) auto;
   align-content: stretch;
 }
 
 .trailer-safe-zone {
-  min-height: 46vh;
+  min-height: 661.94px;
 }
 
 .brand-bar {
@@ -117,13 +134,13 @@ button:disabled {
 }
 
 .brand-bar strong {
-  font-size: clamp(0.9rem, 1.65vh, 1.3rem);
+  font-size: 20.8px;
   line-height: 0.95;
 }
 
 .brand-bar span {
   color: #fff7e8;
-  font-size: clamp(0.72rem, 1.25vh, 0.95rem);
+  font-size: 15.2px;
   font-weight: 900;
   text-align: right;
 }
@@ -132,7 +149,7 @@ button:disabled {
   display: block;
   margin: 0 0 8px;
   color: var(--gold);
-  font-size: clamp(0.76rem, 1.35vh, 1rem);
+  font-size: 16px;
   font-weight: 900;
   text-transform: uppercase;
 }
@@ -142,7 +159,7 @@ button:disabled {
 .game-over-copy h1 {
   margin: 0;
   color: #fff;
-  font-size: clamp(1.8rem, 4.2vh, 3.7rem);
+  font-size: 59.2px;
   line-height: 0.96;
 }
 
@@ -151,7 +168,7 @@ button:disabled {
 .game-over-copy p {
   margin: 10px 0 0;
   color: rgba(255, 247, 232, 0.88);
-  font-size: clamp(0.88rem, 1.55vh, 1.16rem);
+  font-size: 18.56px;
   line-height: 1.28;
 }
 
@@ -160,7 +177,7 @@ button:disabled {
   display: grid;
   justify-items: center;
   gap: 10px;
-  padding: clamp(12px, 1.8vh, 18px);
+  padding: 18px;
   border: 1px solid rgba(0, 0, 0, 0.14);
   border-radius: 8px;
   background: rgba(255, 247, 232, 0.96);
@@ -177,7 +194,7 @@ button:disabled {
 .join-code-panel > span:first-child,
 .mini-code strong {
   color: #4a3724;
-  font-size: clamp(0.72rem, 1.24vh, 0.92rem);
+  font-size: 14.72px;
   font-weight: 1000;
   text-transform: uppercase;
 }
@@ -189,7 +206,7 @@ button:disabled {
 
 .join-code-panel strong {
   color: #3a332d;
-  font-size: clamp(0.8rem, 1.25vh, 1rem);
+  font-size: 16px;
   line-height: 1.15;
 }
 
@@ -202,7 +219,7 @@ button:disabled {
   border-radius: 999px;
   background: var(--ink);
   color: var(--gold);
-  font-size: clamp(1rem, 1.8vh, 1.38rem);
+  font-size: 22.08px;
   font-weight: 1000;
   letter-spacing: 0.04em;
 }
@@ -244,7 +261,7 @@ button:disabled {
 }
 
 .lobby-slot strong {
-  font-size: clamp(1.25rem, 2.2vh, 1.85rem);
+  font-size: 29.6px;
 }
 
 .battle-shell {
@@ -260,7 +277,7 @@ button:disabled {
 
 .battle-topbar strong {
   display: block;
-  font-size: clamp(1rem, 2.1vh, 1.7rem);
+  font-size: 27.2px;
 }
 
 .turn-badge {
@@ -275,7 +292,7 @@ button:disabled {
 
 .turn-badge strong {
   color: #fff;
-  font-size: clamp(1.25rem, 2.8vh, 2.35rem);
+  font-size: 37.6px;
   line-height: 1;
 }
 
@@ -283,13 +300,13 @@ button:disabled {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: center;
-  gap: min(2vh, 18px);
+  gap: 18px;
 }
 
 .player-cards,
 .party-stack {
   display: grid;
-  gap: min(2vh, 18px);
+  gap: 18px;
 }
 
 .combat-card {
@@ -317,7 +334,7 @@ button:disabled {
 .combat-label strong {
   overflow-wrap: anywhere;
   color: #fff;
-  font-size: clamp(0.9rem, 1.6vh, 1.35rem);
+  font-size: 21.6px;
   line-height: 1.02;
 }
 
@@ -356,7 +373,7 @@ button:disabled {
   display: grid;
   place-items: center;
   color: #111;
-  font-size: clamp(0.62rem, 1.05vh, 0.82rem);
+  font-size: 13.12px;
   line-height: 1;
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.72);
 }
@@ -364,19 +381,19 @@ button:disabled {
 .combat-art {
   justify-self: center;
   width: 100%;
-  max-width: min(22vh, 190px);
-  max-height: min(18vh, 180px);
+  max-width: 190px;
+  max-height: 180px;
   object-fit: contain;
   filter: drop-shadow(0 20px 20px rgba(0, 0, 0, 0.34));
 }
 
 .monster-card {
-  min-height: min(42vh, 430px);
+  min-height: 430px;
   justify-content: center;
 }
 
 .player-card:only-child {
-  min-height: min(42vh, 430px);
+  min-height: 430px;
   justify-content: center;
   justify-items: center;
   text-align: center;
@@ -390,8 +407,8 @@ button:disabled {
 }
 
 .monster-art {
-  max-width: min(28vh, 260px);
-  max-height: min(27vh, 275px);
+  max-width: 260px;
+  max-height: 275px;
 }
 
 .effect-line,
@@ -399,7 +416,7 @@ button:disabled {
 .last-moves {
   min-height: 20px;
   color: rgba(255, 247, 232, 0.86);
-  font-size: clamp(0.74rem, 1.35vh, 0.95rem);
+  font-size: 15.2px;
   font-weight: 800;
 }
 
@@ -412,8 +429,8 @@ button:disabled {
   display: grid;
   align-content: center;
   gap: 8px;
-  min-height: clamp(100px, 14vh, 170px);
-  padding: clamp(12px, 1.8vh, 22px);
+  min-height: 170px;
+  padding: 22px;
   border: 2px solid rgba(255, 247, 232, 0.5);
   border-radius: 8px;
   background: rgba(0, 0, 0, 0.32);
@@ -423,7 +440,7 @@ button:disabled {
 .screen-message > p {
   margin: 0;
   color: #fff;
-  font-size: clamp(1rem, 2.05vh, 1.82rem);
+  font-size: 29.12px;
   font-weight: 1000;
   line-height: 1.08;
 }
@@ -436,21 +453,21 @@ button:disabled {
 .battle-log p {
   margin: 0;
   color: rgba(255, 247, 232, 0.78);
-  font-size: clamp(0.74rem, 1.35vh, 1rem);
+  font-size: 16px;
   line-height: 1.22;
 }
 
 .mini-code {
   position: absolute;
-  right: clamp(10px, 2vh, 22px);
-  bottom: clamp(10px, 2vh, 22px);
-  width: clamp(104px, 12vh, 158px);
+  right: 22px;
+  bottom: 22px;
+  width: 158px;
   padding: 8px;
 }
 
 .mini-code span {
   color: var(--ink);
-  font-size: clamp(0.78rem, 1.32vh, 1rem);
+  font-size: 16px;
   font-weight: 1000;
 }
 
