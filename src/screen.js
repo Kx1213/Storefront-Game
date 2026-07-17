@@ -35,6 +35,7 @@ const elements = {
   monsterCard: $("monsterCard"),
   liveBattleMove: $("liveBattleMove"),
   liveBattleImpact: $("liveBattleImpact"),
+  crispySlashAnimation: $("crispySlashAnimation"),
   battleBackgroundVideos: [$("battleBackgroundVideoA"), $("battleBackgroundVideoB")],
   gameCodeLabel: $("gameCodeLabel"),
   lobbyCode: $("lobbyCode"),
@@ -83,6 +84,7 @@ let liveBattleAnimationToken = null;
 let lastBattleSnapshot = null;
 let gameOverRevealTimer = null;
 const liveBattleTimers = new Set();
+const characterImagePreloads = new Map();
 
 function updateScreenScale() {
   const scale = Math.min(window.innerWidth / DESIGN_WIDTH, window.innerHeight / DESIGN_HEIGHT);
@@ -124,6 +126,20 @@ function updateGameCodeLabels(state = null) {
 
 function randomItem(items) {
   return items[Math.floor(Math.random() * items.length)];
+}
+
+function preloadCharacterAssets() {
+  CHARACTERS.forEach((character) => {
+    if (characterImagePreloads.has(character.asset)) {
+      return;
+    }
+
+    const image = new Image(768, 768);
+    image.decoding = "async";
+    image.src = character.asset;
+    characterImagePreloads.set(character.asset, image);
+    image.decode().catch(() => {});
+  });
 }
 
 function renderWebsiteQr() {
@@ -278,6 +294,11 @@ function clearLiveBattleAnimations() {
   lastBattleSnapshot = null;
   elements.liveBattleMove.classList.remove("is-showing");
   elements.liveBattleImpact.classList.remove("is-bursting");
+  if (elements.crispySlashAnimation) {
+    elements.crispySlashAnimation.pause();
+    elements.crispySlashAnimation.currentTime = 0;
+    elements.crispySlashAnimation.classList.remove("is-playing");
+  }
 }
 
 function getPlayerBattleCard(playerId) {
@@ -292,6 +313,33 @@ function showLiveBattleAction(moveName, impact = null) {
     elements.liveBattleImpact.textContent = impact;
     animateIdleElement(elements.liveBattleImpact, "is-bursting", 700);
   }
+}
+
+function playCrispySlashAnimation() {
+  const video = elements.crispySlashAnimation;
+  if (!video) {
+    return;
+  }
+
+  const startPlayback = () => {
+    video.pause();
+    if (video.currentTime > 0.01) {
+      video.currentTime = 0;
+    }
+    video.classList.remove("is-playing");
+    void video.offsetWidth;
+    video.play()
+      .then(() => video.classList.add("is-playing"))
+      .catch(() => video.classList.remove("is-playing"));
+  };
+
+  if (video.readyState < HTMLMediaElement.HAVE_FUTURE_DATA) {
+    video.addEventListener("canplay", startPlayback, { once: true });
+    video.load();
+    return;
+  }
+
+  startPlayback();
 }
 
 function captureBattleSnapshot(state) {
@@ -326,6 +374,9 @@ function animateResolvingMoves(state) {
 
       const playerCard = getPlayerBattleCard(player.id);
       showLiveBattleAction(move.name, randomItem(IDLE_IMPACT_WORDS));
+      if (move.id === "crispy-slash") {
+        playCrispySlashAnimation();
+      }
       animateIdleElement(playerCard, "is-live-attacking", 680);
       if (move.power || move.hits) {
         animateIdleElement(elements.monsterCard, "is-live-hit", 580);
@@ -591,7 +642,7 @@ function playerCard(player, pendingMoves) {
         <strong class="hp-value">${player.hp}/${player.maxHp}</strong>
       </div>
     </div>
-    <img class="combat-art" src="${player.asset}" alt="${player.name}">
+    <img class="combat-art" src="${player.asset}" alt="${player.name}" decoding="async">
     <div class="effect-line">${effectText(player)}</div>
     <div class="locked-move">${player.hp <= 0 ? "Down" : move ? `Locked: ${move.name}` : "Choosing move"}</div>
   `;
@@ -863,12 +914,18 @@ function bindControls() {
 async function boot() {
   updateScreenScale();
   renderWebsiteQr();
+  preloadCharacterAssets();
+  elements.crispySlashAnimation?.load();
   startIdleBattle();
   window.addEventListener("resize", updateScreenScale);
   window.addEventListener("load", renderWebsiteQr, { once: true });
   document.addEventListener("fullscreenchange", updateScreenScale);
   elements.battleBackgroundVideos.forEach((video, index) => {
     video.addEventListener("ended", () => handOffBattleBackground(index));
+  });
+  elements.crispySlashAnimation?.addEventListener("ended", () => {
+    elements.crispySlashAnimation.classList.remove("is-playing");
+    elements.crispySlashAnimation.currentTime = 0;
   });
   bindControls();
 

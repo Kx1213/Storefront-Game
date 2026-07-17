@@ -34,7 +34,7 @@
             <section class="idle-battle-stage" aria-label="Simulated Monster Curry battle preview">
               <div class="idle-battle-arena">
                 <article id="idlePlayerFighter" class="idle-fighter idle-player-fighter">
-                  <img id="idlePlayerArt" src="./assets/characters/katsu-chan.png" alt="Katsu-Chan">
+                  <img id="idlePlayerArt" src="./assets/characters/katsu-chan.png" alt="Katsu-Chan" decoding="async" fetchpriority="high">
                 </article>
 
                 <div class="idle-impact-wrap" aria-hidden="true">
@@ -95,6 +95,9 @@
         </video>
         <div class="battle-background-scrim" aria-hidden="true"></div>
         <div class="live-battle-fx" aria-live="polite" aria-atomic="true">
+          <video id="crispySlashAnimation" class="attack-animation crispy-slash-animation" muted playsinline preload="auto" aria-hidden="true">
+            <source src="./assets/animations/crispy-slash.webm?v=20260717-2" type='video/webm; codecs="vp9"'>
+          </video>
           <strong id="liveBattleMove" class="live-battle-move"></strong>
           <span id="liveBattleImpact" class="live-battle-impact" aria-hidden="true">BAM!</span>
         </div>
@@ -129,7 +132,7 @@
                     <strong id="monsterHpText" class="hp-value">0/0</strong>
                   </div>
                 </div>
-                <img id="monsterArt" class="combat-art monster-art" alt="Monster">
+                <img id="monsterArt" class="combat-art monster-art" alt="Monster" decoding="async">
                 <div id="monsterEffects" class="effect-line"></div>
               </article>
             </section>
