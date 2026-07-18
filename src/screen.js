@@ -32,6 +32,7 @@ const elements = {
   idlePlayerFighter: $("idlePlayerFighter"),
   idlePlayerArt: $("idlePlayerArt"),
   idleMonsterFighter: $("idleMonsterFighter"),
+  idleMonsterArt: $("idleMonsterArt"),
   monsterCard: $("monsterCard"),
   liveBattleMove: $("liveBattleMove"),
   liveBattleImpact: $("liveBattleImpact"),
@@ -84,7 +85,6 @@ let liveBattleAnimationToken = null;
 let lastBattleSnapshot = null;
 let gameOverRevealTimer = null;
 const liveBattleTimers = new Set();
-const characterImagePreloads = new Map();
 
 function updateScreenScale() {
   const scale = Math.min(window.innerWidth / DESIGN_WIDTH, window.innerHeight / DESIGN_HEIGHT);
@@ -126,20 +126,6 @@ function updateGameCodeLabels(state = null) {
 
 function randomItem(items) {
   return items[Math.floor(Math.random() * items.length)];
-}
-
-function preloadCharacterAssets() {
-  CHARACTERS.forEach((character) => {
-    if (characterImagePreloads.has(character.asset)) {
-      return;
-    }
-
-    const image = new Image(768, 768);
-    image.decoding = "async";
-    image.src = character.asset;
-    characterImagePreloads.set(character.asset, image);
-    image.decode().catch(() => {});
-  });
 }
 
 function renderWebsiteQr() {
@@ -185,6 +171,8 @@ function updateIdleBattleDisplay() {
 
   elements.idlePlayerArt.src = state.character.asset;
   elements.idlePlayerArt.alt = state.character.name;
+  elements.idleMonsterArt.src = state.monster.asset;
+  elements.idleMonsterArt.alt = state.monster.name;
 }
 
 function showIdleBattleMove(moveName) {
@@ -677,6 +665,8 @@ function renderBattle(state) {
 
   if (monster) {
     elements.monsterCard.classList.toggle("is-defeated", monster.hp <= 0);
+    elements.monsterCard.style.setProperty("--fighter-color", monster.color || "#1d6e58");
+    elements.monsterCard.style.setProperty("--fighter-accent", monster.accent || "#f5ad0f");
     elements.monsterName.textContent = monster.name;
     renderHp(elements.monsterHpBar, elements.monsterHpText, monster);
     elements.monsterArt.src = monster.asset;
@@ -914,8 +904,6 @@ function bindControls() {
 async function boot() {
   updateScreenScale();
   renderWebsiteQr();
-  preloadCharacterAssets();
-  elements.crispySlashAnimation?.load();
   startIdleBattle();
   window.addEventListener("resize", updateScreenScale);
   window.addEventListener("load", renderWebsiteQr, { once: true });

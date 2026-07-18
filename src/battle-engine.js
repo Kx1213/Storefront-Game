@@ -252,13 +252,18 @@ function applyMove(actor, move, players, monster, messages) {
 
 function chooseMonsterMove(monster, players) {
   const moves = monster.moves || ["monster-claw"];
+  const guardMoves = moves.filter((moveId) => {
+    const move = getMove(moveId);
+    return move?.target === "self" && move.shieldPct;
+  });
+  const partyMoves = moves.filter((moveId) => getMove(moveId)?.target === "all-players");
 
-  if (monster.hp < monster.maxHp * 0.45 && moves.includes("monster-guard") && Math.random() < 0.28) {
-    return "monster-guard";
+  if (monster.hp < monster.maxHp * 0.45 && guardMoves.length && Math.random() < 0.28) {
+    return guardMoves[randomInt(0, guardMoves.length - 1)];
   }
 
-  if (players.length > 1 && moves.includes("spice-roar") && Math.random() < 0.28) {
-    return "spice-roar";
+  if (players.length > 1 && partyMoves.length && Math.random() < 0.28) {
+    return partyMoves[randomInt(0, partyMoves.length - 1)];
   }
 
   const damageMoves = moves.filter((moveId) => getMove(moveId)?.power);
@@ -284,7 +289,7 @@ function applyMonsterMove(monster, move, players, messages) {
 
   if (move.target === "self" && move.shieldPct) {
     const amount = shield(monster, move.shieldPct);
-    messages.push(`${monster.name} gained ${amount} shield.`);
+    messages.push(`${monster.name} used ${move.name}. A ${amount}-point shield formed.`);
     return;
   }
 

@@ -1,4 +1,4 @@
-import { CHARACTERS, MONSTER_ASSET, getCharacter, getLevel } from "./game-data.js";
+import { CHARACTERS, getCharacter, getLevel } from "./game-data.js";
 
 export function sanitizeGameId(value) {
   if (!value) {
@@ -98,9 +98,9 @@ export function buildMonster(mode = "solo", levelIndex = 0) {
     hp: level.maxHp,
     atk: level.atk,
     shield: 0,
-    color: "#1d6e58",
-    accent: "#f5ad0f",
-    asset: MONSTER_ASSET,
+    color: level.color || "#1d6e58",
+    accent: level.accent || "#f5ad0f",
+    asset: level.asset,
     moves: level.moves,
     effects: createEmptyEffects()
   };

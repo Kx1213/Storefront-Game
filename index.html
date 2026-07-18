@@ -7,7 +7,7 @@
     <link rel="icon" href="data:,">
     <link rel="stylesheet" href="./styles.css?v=20260715-1730">
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-    <script type="module" src="./src/screen.js?v=20260715-1730"></script>
+    <script type="module" src="./src/screen.js?v=20260718-performance2"></script>
   </head>
   <body class="screen-page">
     <main class="screen-app">
@@ -42,7 +42,7 @@
                 </div>
 
                 <article id="idleMonsterFighter" class="idle-fighter idle-monster-fighter">
-                  <img src="./assets/monster-curry-beast.svg" alt="Monster Curry beast">
+                  <img id="idleMonsterArt" src="./assets/enemies/curry-goblin.webp" alt="Curry Goblin" decoding="async">
                 </article>
               </div>
 
@@ -87,15 +87,15 @@
       </section>
 
       <section id="battleView" class="display-view battle-view" hidden>
-        <video id="battleBackgroundVideoA" class="battle-background-video is-active" muted playsinline preload="auto" aria-hidden="true">
+        <video id="battleBackgroundVideoA" class="battle-background-video is-active" muted playsinline preload="none" aria-hidden="true">
           <source src="./assets/battle-background.mp4?v=20260715-1350" type="video/mp4">
         </video>
-        <video id="battleBackgroundVideoB" class="battle-background-video" muted playsinline preload="auto" aria-hidden="true">
+        <video id="battleBackgroundVideoB" class="battle-background-video" muted playsinline preload="none" aria-hidden="true">
           <source src="./assets/battle-background.mp4?v=20260715-1350" type="video/mp4">
         </video>
         <div class="battle-background-scrim" aria-hidden="true"></div>
         <div class="live-battle-fx" aria-live="polite" aria-atomic="true">
-          <video id="crispySlashAnimation" class="attack-animation crispy-slash-animation" muted playsinline preload="auto" aria-hidden="true">
+          <video id="crispySlashAnimation" class="attack-animation crispy-slash-animation" muted playsinline preload="none" aria-hidden="true">
             <source src="./assets/animations/crispy-slash.webm?v=20260717-2" type='video/webm; codecs="vp9"'>
           </video>
           <strong id="liveBattleMove" class="live-battle-move"></strong>

@@ -246,6 +246,102 @@ export const MOVES = Object.freeze({
     power: 45,
     selfShieldPct: 0.1
   },
+  "sauce-swipe": {
+    id: "sauce-swipe",
+    name: "Sauce Swipe",
+    description: "A quick curry-coated claw strike.",
+    target: "player",
+    power: 18
+  },
+  "curry-cloud": {
+    id: "curry-cloud",
+    name: "Curry Cloud",
+    description: "A spicy cloud that lowers the whole party's Attack.",
+    target: "all-players",
+    attackDownPct: 0.12,
+    duration: 2
+  },
+  "root-bash": {
+    id: "root-bash",
+    name: "Root Bash",
+    description: "A heavy strike powered by twisting roots.",
+    target: "player",
+    power: 23
+  },
+  "gravy-snare": {
+    id: "gravy-snare",
+    name: "Gravy Snare",
+    description: "Sticky gravy damages one player and lowers Attack.",
+    target: "player",
+    power: 17,
+    attackDownPct: 0.15,
+    duration: 2
+  },
+  "root-guard": {
+    id: "root-guard",
+    name: "Root Guard",
+    description: "The brute hardens its roots into a shield.",
+    target: "self",
+    shieldPct: 0.12
+  },
+  "spore-punch": {
+    id: "spore-punch",
+    name: "Spore Punch",
+    description: "A crushing fist covered in wild mushrooms.",
+    target: "player",
+    power: 28
+  },
+  "mushroom-haze": {
+    id: "mushroom-haze",
+    name: "Mushroom Haze",
+    description: "A spore cloud that lowers the whole party's Attack.",
+    target: "all-players",
+    attackDownPct: 0.18,
+    duration: 2
+  },
+  "fungal-guard": {
+    id: "fungal-guard",
+    name: "Fungal Guard",
+    description: "A dense mushroom barrier protects the brute.",
+    target: "self",
+    shieldPct: 0.14
+  },
+  "flame-claw": {
+    id: "flame-claw",
+    name: "Flame Claw",
+    description: "A blazing claw strike.",
+    target: "player",
+    power: 30
+  },
+  "ember-crush": {
+    id: "ember-crush",
+    name: "Ember Crush",
+    description: "A powerful blast of concentrated heat.",
+    target: "player",
+    power: 34
+  },
+  "inferno-stomp": {
+    id: "inferno-stomp",
+    name: "Inferno Stomp",
+    description: "The Blazeborn Overlord erupts with a devastating stomp.",
+    target: "player",
+    power: 38
+  },
+  "wildfire-roar": {
+    id: "wildfire-roar",
+    name: "Wildfire Roar",
+    description: "A scorching roar that lowers the whole party's Attack.",
+    target: "all-players",
+    attackDownPct: 0.2,
+    duration: 2
+  },
+  "molten-guard": {
+    id: "molten-guard",
+    name: "Molten Guard",
+    description: "A shell of molten curry forms a powerful shield.",
+    target: "self",
+    shieldPct: 0.15
+  },
   "monster-claw": {
     id: "monster-claw",
     name: "Monster Claw",
@@ -387,22 +483,20 @@ export const CHARACTERS = Object.freeze([
 
 export const LEVELS = Object.freeze({
   solo: [
-    { name: "Level 1: Curry Scout", maxHp: 500, atk: 70, moves: ["monster-claw", "curry-splash"] },
-    { name: "Level 2: Sauce Brute", maxHp: 700, atk: 78, moves: ["monster-claw", "curry-splash"] },
-    { name: "Level 3: Spice Crusher", maxHp: 900, atk: 86, moves: ["pot-slam", "spice-roar"] },
-    { name: "Level 4: Monster Curry Titan", maxHp: 1580, atk: 94, moves: ["pot-slam", "curry-splash", "mega-stomp"] },
-    { name: "Level 5: Final Curry Monster", maxHp: 1900, atk: 104, moves: ["mega-stomp", "spice-roar", "monster-guard"] }
+    { name: "Curry Goblin", maxHp: 500, atk: 70, color: "#657d2f", accent: "#f5ad0f", asset: "./assets/enemies/curry-goblin.webp", moves: ["sauce-swipe", "curry-splash"] },
+    { name: "Root Curry Brute", maxHp: 700, atk: 78, color: "#a9601d", accent: "#8cad2d", asset: "./assets/enemies/root-curry-brute.webp", moves: ["root-bash", "gravy-snare"] },
+    { name: "Sporeback Brute", maxHp: 900, atk: 86, color: "#557329", accent: "#c7b274", asset: "./assets/enemies/sporeback-brute.webp", moves: ["spore-punch", "mushroom-haze", "fungal-guard"] },
+    { name: "Blaze Fiend", maxHp: 1580, atk: 94, color: "#e84c0f", accent: "#ffd44d", asset: "./assets/enemies/blaze-fiend.webp", moves: ["flame-claw", "ember-crush", "wildfire-roar"] },
+    { name: "Blazeborn Overlord", maxHp: 1900, atk: 104, color: "#b92813", accent: "#ff8a19", asset: "./assets/enemies/blaze-fiend.webp", moves: ["inferno-stomp", "wildfire-roar", "molten-guard"] }
   ],
   multiplayer: [
-    { name: "Level 1: Curry Scout Duo", maxHp: 1400, atk: 82, moves: ["monster-claw", "curry-splash", "spice-roar"] },
-    { name: "Level 2: Sauce Brute Duo", maxHp: 1780, atk: 92, moves: ["monster-claw", "pot-slam", "monster-guard"] },
-    { name: "Level 3: Spice Crusher Duo", maxHp: 2180, atk: 102, moves: ["pot-slam", "spice-roar", "monster-guard"] },
-    { name: "Level 4: Monster Curry Titan Duo", maxHp: 2650, atk: 112, moves: ["pot-slam", "curry-splash", "mega-stomp"] },
-    { name: "Level 5: Final Curry Monster Duo", maxHp: 3200, atk: 124, moves: ["mega-stomp", "spice-roar", "monster-guard"] }
+    { name: "Curry Goblin", maxHp: 1400, atk: 82, color: "#657d2f", accent: "#f5ad0f", asset: "./assets/enemies/curry-goblin.webp", moves: ["sauce-swipe", "curry-splash", "curry-cloud"] },
+    { name: "Root Curry Brute", maxHp: 1780, atk: 92, color: "#a9601d", accent: "#8cad2d", asset: "./assets/enemies/root-curry-brute.webp", moves: ["root-bash", "gravy-snare", "root-guard"] },
+    { name: "Sporeback Brute", maxHp: 2180, atk: 102, color: "#557329", accent: "#c7b274", asset: "./assets/enemies/sporeback-brute.webp", moves: ["spore-punch", "mushroom-haze", "fungal-guard"] },
+    { name: "Blaze Fiend", maxHp: 2650, atk: 112, color: "#e84c0f", accent: "#ffd44d", asset: "./assets/enemies/blaze-fiend.webp", moves: ["flame-claw", "ember-crush", "wildfire-roar"] },
+    { name: "Blazeborn Overlord", maxHp: 3200, atk: 124, color: "#b92813", accent: "#ff8a19", asset: "./assets/enemies/blaze-fiend.webp", moves: ["inferno-stomp", "wildfire-roar", "molten-guard"] }
   ]
 });
-
-export const MONSTER_ASSET = "./assets/monster-curry-beast.svg";
 
 export function getCharacter(characterId) {
   return CHARACTERS.find((character) => character.id === characterId) || CHARACTERS[0];
