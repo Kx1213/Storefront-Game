@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Monster Curry Storefront Battle</title>
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="./styles.css?v=20260715-1730">
+    <link rel="stylesheet" href="./styles.css?v=20260719-transparent1">
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-    <script type="module" src="./src/screen.js?v=20260718-performance2"></script>
+    <script type="module" src="./src/screen.js?v=20260719-transparent2"></script>
   </head>
   <body class="screen-page">
     <main class="screen-app">
@@ -95,9 +95,7 @@
         </video>
         <div class="battle-background-scrim" aria-hidden="true"></div>
         <div class="live-battle-fx" aria-live="polite" aria-atomic="true">
-          <video id="crispySlashAnimation" class="attack-animation crispy-slash-animation" muted playsinline preload="none" aria-hidden="true">
-            <source src="./assets/animations/crispy-slash.webm?v=20260717-2" type='video/webm; codecs="vp9"'>
-          </video>
+          <video id="moveAnimation" class="attack-animation move-animation" muted playsinline preload="none" aria-hidden="true"></video>
           <strong id="liveBattleMove" class="live-battle-move"></strong>
           <span id="liveBattleImpact" class="live-battle-impact" aria-hidden="true">BAM!</span>
         </div>

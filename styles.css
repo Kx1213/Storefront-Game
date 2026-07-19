@@ -507,11 +507,29 @@ button:disabled {
   object-fit: contain;
   transform: translate(-50%, -50%) scale(0.9);
   filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.42));
-  will-change: opacity, transform;
 }
 
 .attack-animation.is-playing {
   opacity: 1;
+  will-change: opacity, transform;
+}
+
+.move-animation {
+  visibility: hidden;
+  width: 108%;
+  max-width: 620px;
+  object-fit: contain;
+  mix-blend-mode: screen;
+  filter: none;
+  contain: layout paint;
+}
+
+.move-animation.has-transparent-source {
+  mix-blend-mode: normal;
+}
+
+.move-animation.is-playing {
+  visibility: visible;
 }
 
 .live-battle-move {

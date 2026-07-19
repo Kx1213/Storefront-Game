@@ -4,7 +4,8 @@ export const MOVES = Object.freeze({
     name: "Crispy Slash",
     description: "Deals 25 Power damage to the monster.",
     target: "monster",
-    power: 25
+    power: 25,
+    animation: "./assets/animations/characters/katsu-chan/crispy-slash.mp4"
   },
   "heros-courage": {
     id: "heros-courage",
@@ -12,14 +13,16 @@ export const MOVES = Object.freeze({
     description: "Increase own Attack by 20% for 2 turns.",
     target: "self",
     attackUpPct: 0.2,
-    duration: 2
+    duration: 2,
+    animation: "./assets/animations/characters/katsu-chan/heros-courage.mp4"
   },
   "comfort-meal": {
     id: "comfort-meal",
     name: "Comfort Meal",
     description: "Heal self for 20% HP.",
     target: "self",
-    healPct: 0.2
+    healPct: 0.2,
+    animation: "./assets/animations/characters/katsu-chan/comfort-meal.mp4"
   },
   "counter-guard": {
     id: "counter-guard",
@@ -28,7 +31,8 @@ export const MOVES = Object.freeze({
     target: "self",
     damageReductionPct: 0.5,
     counterPower: 15,
-    duration: 1
+    duration: 1,
+    animation: "./assets/animations/characters/katsu-chan/counter-guard.mp4"
   },
   "vine-whip": {
     id: "vine-whip",
@@ -65,7 +69,8 @@ export const MOVES = Object.freeze({
     name: "Mega Chomp",
     description: "Deals 30 Power damage.",
     target: "monster",
-    power: 30
+    power: 30,
+    animation: "./assets/animations/characters/giga-nomu/mega-chomp.mp4"
   },
   "devour": {
     id: "devour",
@@ -73,42 +78,48 @@ export const MOVES = Object.freeze({
     description: "Damage the monster and recover 50% of damage dealt.",
     target: "monster",
     power: 24,
-    lifestealPct: 0.5
+    lifestealPct: 0.5,
+    animation: "./assets/animations/characters/giga-nomu/devour.mp4"
   },
   "belly-shield": {
     id: "belly-shield",
     name: "Belly Shield",
     description: "Gain a shield equal to 25% Max HP.",
     target: "self",
-    shieldPct: 0.25
+    shieldPct: 0.25,
+    animation: "./assets/animations/characters/giga-nomu/belly-shield.mp4"
   },
   "hungry-challenge": {
     id: "hungry-challenge",
     name: "Hungry Challenge",
     description: "Taunt the monster for 2 turns.",
     target: "self",
-    tauntTurns: 2
+    tauntTurns: 2,
+    animation: "./assets/animations/characters/giga-nomu/hungry-challenge.mp4"
   },
   "egg-toss": {
     id: "egg-toss",
     name: "Egg Toss",
     description: "Deals 15 Power damage.",
     target: "monster",
-    power: 15
+    power: 15,
+    animation: "./assets/animations/characters/tamago-puffy/egg-toss.mp4"
   },
   "fluffy-hug": {
     id: "fluffy-hug",
     name: "Fluffy Hug",
     description: "Heal the lowest-HP ally by 30% HP.",
     target: "lowest-ally",
-    healPct: 0.3
+    healPct: 0.3,
+    animation: "./assets/animations/characters/tamago-puffy/fluffy-hug.mp4"
   },
   "sunny-side-up": {
     id: "sunny-side-up",
     name: "Sunny Side Up",
     description: "Remove debuffs from the lowest-HP ally.",
     target: "lowest-ally",
-    cleanse: true
+    cleanse: true,
+    animation: "./assets/animations/characters/tamago-puffy/sunny-side-up.mp4"
   },
   "sweet-dreams": {
     id: "sweet-dreams",
@@ -117,21 +128,24 @@ export const MOVES = Object.freeze({
     target: "lowest-ally",
     damageReductionPct: 0.2,
     regenPct: 0.1,
-    duration: 2
+    duration: 2,
+    animation: "./assets/animations/characters/tamago-puffy/sweet-dreams.mp4"
   },
   "cheese-wheel": {
     id: "cheese-wheel",
     name: "Cheese Wheel",
     description: "Deals 20 Power damage.",
     target: "monster",
-    power: 20
+    power: 20,
+    animation: "./assets/animations/characters/cheezu-mellow/cheese-wheel.mp4"
   },
   "melted-cheese": {
     id: "melted-cheese",
     name: "Melted Cheese",
     description: "Shield the lowest-HP ally for 30% Max HP.",
     target: "lowest-ally",
-    shieldPct: 0.3
+    shieldPct: 0.3,
+    animation: "./assets/animations/characters/cheezu-mellow/melted-cheese.mp4"
   },
   "cover-up": {
     id: "cover-up",
@@ -139,7 +153,8 @@ export const MOVES = Object.freeze({
     description: "Redirect attacks from the weakest ally to Cheezu.",
     target: "lowest-ally",
     cover: true,
-    duration: 1
+    duration: 1,
+    animation: "./assets/animations/characters/cheezu-mellow/cover-up.mp4"
   },
   "comfort-feast": {
     id: "comfort-feast",
@@ -148,7 +163,8 @@ export const MOVES = Object.freeze({
     target: "all-allies",
     healPct: 0.15,
     damageReductionPct: 0.2,
-    duration: 2
+    duration: 2,
+    animation: "./assets/animations/characters/cheezu-mellow/comfort-feast.mp4"
   },
   "noodle-strike": {
     id: "noodle-strike",

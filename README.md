@@ -12,6 +12,7 @@ Static HTML/CSS/JavaScript storefront battle prototype. The big screen shows a t
 - Added 5 solo levels and 5 harder co-op levels.
 - Replaced the generic monster art with four enemy designs: Curry Goblin, Root Curry Brute, Sporeback Brute, and Blaze Fiend.
 - Added enemy-specific move sets and uses an upgraded Blaze Fiend form, Blazeborn Overlord, for the fifth encounter.
+- Added on-demand MP4 move animations for Katsu-Chan, Giga Nomu, Tamago Puffy, and Cheezu Mellow without preloading the full animation library.
 - Battle is cooperative: 1 or 2 players fight the monster, reduce monster HP to 0, and advance through levels.
 - The big screen uses a fixed 577×1439 design canvas and scales it uniformly, so every display with the same ratio has the same composition.
 - The screen creates a random four-digit game code and replaces it after each completed game.

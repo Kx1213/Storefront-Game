@@ -16,6 +16,7 @@ const DESIGN_WIDTH = 577;
 const DESIGN_HEIGHT = 1439;
 const SCREEN_GAME_STORAGE_KEY = "storefront-screen-game";
 const BATTLE_BACKGROUND_HANDOFF_LEAD_SECONDS = 0.16;
+const MOVE_ANIMATION_VERSION = "20260719-transparent2";
 const WEBSITE_URL = "https://reito-bt.github.io/Monster-Curry-Personality-Prototype-Website/";
 const IDLE_IMPACT_WORDS = ["BAM!", "SIZZLE!", "CRUNCH!", "POW!", "SLASH!", "BOOM!"];
 
@@ -36,7 +37,7 @@ const elements = {
   monsterCard: $("monsterCard"),
   liveBattleMove: $("liveBattleMove"),
   liveBattleImpact: $("liveBattleImpact"),
-  crispySlashAnimation: $("crispySlashAnimation"),
+  moveAnimation: $("moveAnimation"),
   battleBackgroundVideos: [$("battleBackgroundVideoA"), $("battleBackgroundVideoB")],
   gameCodeLabel: $("gameCodeLabel"),
   lobbyCode: $("lobbyCode"),
@@ -82,9 +83,15 @@ let battleBackgroundPreload = null;
 let idleBattleTimer = null;
 let idleBattleState = null;
 let liveBattleAnimationToken = null;
+let moveAnimationRequest = 0;
+let moveAnimationFallbackTimer = null;
 let lastBattleSnapshot = null;
 let gameOverRevealTimer = null;
 const liveBattleTimers = new Set();
+const warmedMoveAnimations = new Set();
+const transparentMoveAnimationsSupported = Boolean(
+  elements.moveAnimation?.canPlayType('video/webm; codecs="vp9"')
+);
 
 function updateScreenScale() {
   const scale = Math.min(window.innerWidth / DESIGN_WIDTH, window.innerHeight / DESIGN_HEIGHT);
@@ -282,10 +289,18 @@ function clearLiveBattleAnimations() {
   lastBattleSnapshot = null;
   elements.liveBattleMove.classList.remove("is-showing");
   elements.liveBattleImpact.classList.remove("is-bursting");
-  if (elements.crispySlashAnimation) {
-    elements.crispySlashAnimation.pause();
-    elements.crispySlashAnimation.currentTime = 0;
-    elements.crispySlashAnimation.classList.remove("is-playing");
+  moveAnimationRequest += 1;
+  window.clearTimeout(moveAnimationFallbackTimer);
+  moveAnimationFallbackTimer = null;
+  if (elements.moveAnimation) {
+    elements.moveAnimation.pause();
+    elements.moveAnimation.oncanplay = null;
+    elements.moveAnimation.onerror = null;
+    elements.moveAnimation.classList.remove("is-playing", "has-transparent-source");
+    if (elements.moveAnimation.getAttribute("src")) {
+      elements.moveAnimation.removeAttribute("src");
+      elements.moveAnimation.load();
+    }
   }
 }
 
@@ -303,31 +318,119 @@ function showLiveBattleAction(moveName, impact = null) {
   }
 }
 
-function playCrispySlashAnimation() {
-  const video = elements.crispySlashAnimation;
-  if (!video) {
+function moveAnimationUrl(move, transparent = transparentMoveAnimationsSupported) {
+  if (!move?.animation) {
+    return null;
+  }
+
+  const animationPath = transparent
+    ? move.animation.replace(/\.mp4$/i, ".webm")
+    : move.animation;
+  const url = new URL(animationPath, window.location.href);
+  url.searchParams.set("v", MOVE_ANIMATION_VERSION);
+  return url.href;
+}
+
+function warmMoveAnimation(move) {
+  const sourceUrls = new Set([
+    moveAnimationUrl(move),
+    moveAnimationUrl(move, false)
+  ]);
+  sourceUrls.forEach((sourceUrl) => {
+    if (!sourceUrl || warmedMoveAnimations.has(sourceUrl)) {
+      return;
+    }
+
+    warmedMoveAnimations.add(sourceUrl);
+    fetch(sourceUrl, { cache: "force-cache" }).catch(() => warmedMoveAnimations.delete(sourceUrl));
+  });
+}
+
+function playMoveAnimation(move) {
+  const video = elements.moveAnimation;
+  if (!video || !move?.animation) {
     return;
   }
 
-  const startPlayback = () => {
-    video.pause();
-    if (video.currentTime > 0.01) {
-      video.currentTime = 0;
+  const requestId = ++moveAnimationRequest;
+  const transparentUrl = moveAnimationUrl(move, true);
+  const fallbackUrl = moveAnimationUrl(move, false);
+
+  const startPlayback = (sourceUrl, usesTransparency) => {
+    if (requestId !== moveAnimationRequest || video.src !== sourceUrl) {
+      return;
     }
+
+    window.clearTimeout(moveAnimationFallbackTimer);
+    moveAnimationFallbackTimer = null;
+    video.oncanplay = null;
+    video.onerror = null;
+    video.pause();
+    video.currentTime = 0;
     video.classList.remove("is-playing");
+    video.classList.toggle("has-transparent-source", usesTransparency);
     void video.offsetWidth;
+    video.classList.add("is-playing");
     video.play()
-      .then(() => video.classList.add("is-playing"))
-      .catch(() => video.classList.remove("is-playing"));
+      .catch(() => {
+        if (requestId !== moveAnimationRequest) {
+          return;
+        }
+
+        if (usesTransparency) {
+          loadSource(fallbackUrl, false);
+        } else {
+          video.classList.remove("is-playing");
+        }
+      });
   };
 
-  if (video.readyState < HTMLMediaElement.HAVE_FUTURE_DATA) {
-    video.addEventListener("canplay", startPlayback, { once: true });
-    video.load();
-    return;
-  }
+  const loadSource = (sourceUrl, usesTransparency) => {
+    if (!sourceUrl || requestId !== moveAnimationRequest) {
+      return;
+    }
 
-  startPlayback();
+    window.clearTimeout(moveAnimationFallbackTimer);
+    moveAnimationFallbackTimer = null;
+    video.pause();
+    video.classList.remove("is-playing");
+    video.classList.toggle("has-transparent-source", usesTransparency);
+    video.oncanplay = () => startPlayback(sourceUrl, usesTransparency);
+    video.onerror = () => {
+      if (requestId !== moveAnimationRequest) {
+        return;
+      }
+
+      if (usesTransparency) {
+        loadSource(fallbackUrl, false);
+      } else {
+        video.classList.remove("is-playing");
+      }
+    };
+
+    if (video.src !== sourceUrl) {
+      video.src = sourceUrl;
+    }
+
+    if (video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+      startPlayback(sourceUrl, usesTransparency);
+      return;
+    }
+
+    video.load();
+    if (usesTransparency) {
+      moveAnimationFallbackTimer = window.setTimeout(() => {
+        if (requestId === moveAnimationRequest && video.readyState < HTMLMediaElement.HAVE_FUTURE_DATA) {
+          loadSource(fallbackUrl, false);
+        }
+      }, 700);
+    }
+  };
+
+  loadSource(
+    transparentMoveAnimationsSupported ? transparentUrl : fallbackUrl,
+    transparentMoveAnimationsSupported
+  );
 }
 
 function captureBattleSnapshot(state) {
@@ -362,9 +465,7 @@ function animateResolvingMoves(state) {
 
       const playerCard = getPlayerBattleCard(player.id);
       showLiveBattleAction(move.name, randomItem(IDLE_IMPACT_WORDS));
-      if (move.id === "crispy-slash") {
-        playCrispySlashAnimation();
-      }
+      playMoveAnimation(move);
       animateIdleElement(playerCard, "is-live-attacking", 680);
       if (move.power || move.hits) {
         animateIdleElement(elements.monsterCard, "is-live-hit", 580);
@@ -687,9 +788,10 @@ function renderBattle(state) {
   }
 
   const chosenMoves = Object.values(state.pendingMoves || {})
-    .map((entry) => getMove(entry.moveId)?.name)
+    .map((entry) => getMove(entry.moveId))
     .filter(Boolean);
-  elements.lastMoves.textContent = chosenMoves.length ? `Locked moves: ${chosenMoves.join(" + ")}` : "";
+  chosenMoves.forEach(warmMoveAnimation);
+  elements.lastMoves.textContent = chosenMoves.length ? `Locked moves: ${chosenMoves.map((move) => move.name).join(" + ")}` : "";
   renderLog(state.log);
   animateResolvingMoves(state);
   animateRoundOutcome(state, previousSnapshot);
@@ -911,9 +1013,9 @@ async function boot() {
   elements.battleBackgroundVideos.forEach((video, index) => {
     video.addEventListener("ended", () => handOffBattleBackground(index));
   });
-  elements.crispySlashAnimation?.addEventListener("ended", () => {
-    elements.crispySlashAnimation.classList.remove("is-playing");
-    elements.crispySlashAnimation.currentTime = 0;
+  elements.moveAnimation?.addEventListener("ended", () => {
+    elements.moveAnimation.classList.remove("is-playing");
+    elements.moveAnimation.currentTime = 0;
   });
   bindControls();
 
