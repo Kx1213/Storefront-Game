@@ -39,14 +39,16 @@ export const MOVES = Object.freeze({
     name: "Vine Whip",
     description: "Deals 20 Power damage.",
     target: "monster",
-    power: 20
+    power: 20,
+    animation: "./assets/animations/characters/monstora-sharemi/vine-whip.mp4"
   },
   "sharing-feast": {
     id: "sharing-feast",
     name: "Sharing Feast",
     description: "Heal all allies by 15% HP.",
     target: "all-allies",
-    healPct: 0.15
+    healPct: 0.15,
+    animation: "./assets/animations/characters/monstora-sharemi/sharing-feast.mp4"
   },
   "rally-together": {
     id: "rally-together",
@@ -54,7 +56,8 @@ export const MOVES = Object.freeze({
     description: "Increase all allies' Attack by 20% for 2 turns.",
     target: "all-allies",
     attackUpPct: 0.2,
-    duration: 2
+    duration: 2,
+    animation: "./assets/animations/characters/monstora-sharemi/rally-together.mp4"
   },
   "tangling-vines": {
     id: "tangling-vines",
@@ -62,7 +65,8 @@ export const MOVES = Object.freeze({
     description: "Reduce the monster's Attack by 20% for 2 turns.",
     target: "monster",
     attackDownPct: 0.2,
-    duration: 2
+    duration: 2,
+    animation: "./assets/animations/characters/monstora-sharemi/tangling-vines.mp4"
   },
   "mega-chomp": {
     id: "mega-chomp",
@@ -171,14 +175,16 @@ export const MOVES = Object.freeze({
     name: "Noodle Strike",
     description: "Deals 25 Power damage.",
     target: "monster",
-    power: 25
+    power: 25,
+    animation: "./assets/animations/characters/ramy-noodleton/noodle-strike.mp4"
   },
   "slurp-combo": {
     id: "slurp-combo",
     name: "Slurp Combo",
     description: "Attack twice, each hit dealing 15 Power.",
     target: "monster",
-    hits: [15, 15]
+    hits: [15, 15],
+    animation: "./assets/animations/characters/ramy-noodleton/slurp-combo.mp4"
   },
   "cold-broth": {
     id: "cold-broth",
@@ -186,7 +192,8 @@ export const MOVES = Object.freeze({
     description: "Increase own Attack by 20% for 2 turns.",
     target: "self",
     attackUpPct: 0.2,
-    duration: 2
+    duration: 2,
+    animation: "./assets/animations/characters/ramy-noodleton/cold-broth.mp4"
   },
   "finishing-slurp": {
     id: "finishing-slurp",
@@ -195,14 +202,16 @@ export const MOVES = Object.freeze({
     target: "monster",
     power: 40,
     executeBelowPct: 0.4,
-    executeBonusPct: 0.5
+    executeBonusPct: 0.5,
+    animation: "./assets/animations/characters/ramy-noodleton/finishing-slurp.mp4"
   },
   "sizzling-plate": {
     id: "sizzling-plate",
     name: "Sizzling Plate",
     description: "Deals 35 Power damage.",
     target: "monster",
-    power: 35
+    power: 35,
+    animation: "./assets/animations/characters/hot-sizz/sizzling-plate.mp4"
   },
   "flame-burst": {
     id: "flame-burst",
@@ -211,7 +220,8 @@ export const MOVES = Object.freeze({
     target: "monster",
     power: 20,
     burnPct: 0.05,
-    burnTurns: 2
+    burnTurns: 2,
+    animation: "./assets/animations/characters/hot-sizz/flame-burst.mp4"
   },
   "heat-up": {
     id: "heat-up",
@@ -219,7 +229,8 @@ export const MOVES = Object.freeze({
     description: "Increase own Attack by 30% for 2 turns.",
     target: "self",
     attackUpPct: 0.3,
-    duration: 2
+    duration: 2,
+    animation: "./assets/animations/characters/hot-sizz/heat-up.mp4"
   },
   "grand-performance": {
     id: "grand-performance",
@@ -228,14 +239,16 @@ export const MOVES = Object.freeze({
     target: "monster",
     power: 60,
     selfDefenseDownPct: 0.2,
-    selfDefenseDownTurns: 1
+    selfDefenseDownTurns: 1,
+    animation: "./assets/animations/characters/hot-sizz/grand-performance.mp4"
   },
   "precision-skewer": {
     id: "precision-skewer",
     name: "Precision Skewer",
     description: "Deals 28 Power damage.",
     target: "monster",
-    power: 28
+    power: 28,
+    animation: "./assets/animations/characters/teppa-spark/precision-skewer.mp4"
   },
   "spark-plate": {
     id: "spark-plate",
@@ -244,7 +257,8 @@ export const MOVES = Object.freeze({
     target: "monster",
     power: 18,
     attackDownPct: 0.15,
-    duration: 2
+    duration: 2,
+    animation: "./assets/animations/characters/teppa-spark/spark-plate.mp4"
   },
   "focus-flambe": {
     id: "focus-flambe",
@@ -252,7 +266,8 @@ export const MOVES = Object.freeze({
     description: "Increase own Attack by 25% for 2 turns.",
     target: "self",
     attackUpPct: 0.25,
-    duration: 2
+    duration: 2,
+    animation: "./assets/animations/characters/teppa-spark/focus-flambe.mp4"
   },
   "final-showpiece": {
     id: "final-showpiece",
@@ -260,7 +275,30 @@ export const MOVES = Object.freeze({
     description: "Deals 45 Power and gains a small shield.",
     target: "monster",
     power: 45,
-    selfShieldPct: 0.1
+    selfShieldPct: 0.1,
+    animation: "./assets/animations/characters/teppa-spark/final-showpiece.mp4"
+  },
+  "filthy-swipe": {
+    id: "filthy-swipe",
+    name: "Filthy Swipe",
+    description: "A grime-covered claw strike from the Rotten Goblin.",
+    target: "player",
+    power: 29
+  },
+  "noxious-stench": {
+    id: "noxious-stench",
+    name: "Noxious Stench",
+    description: "A foul cloud that lowers the whole party's Attack.",
+    target: "all-players",
+    attackDownPct: 0.19,
+    duration: 2
+  },
+  "sludge-guard": {
+    id: "sludge-guard",
+    name: "Sludge Guard",
+    description: "The Rotten Goblin coats itself in protective sludge.",
+    target: "self",
+    shieldPct: 0.14
   },
   "sauce-swipe": {
     id: "sauce-swipe",
@@ -336,13 +374,6 @@ export const MOVES = Object.freeze({
     target: "player",
     power: 34
   },
-  "inferno-stomp": {
-    id: "inferno-stomp",
-    name: "Inferno Stomp",
-    description: "The Blazeborn Overlord erupts with a devastating stomp.",
-    target: "player",
-    power: 38
-  },
   "wildfire-roar": {
     id: "wildfire-roar",
     name: "Wildfire Roar",
@@ -350,13 +381,6 @@ export const MOVES = Object.freeze({
     target: "all-players",
     attackDownPct: 0.2,
     duration: 2
-  },
-  "molten-guard": {
-    id: "molten-guard",
-    name: "Molten Guard",
-    description: "A shell of molten curry forms a powerful shield.",
-    target: "self",
-    shieldPct: 0.15
   },
   "monster-claw": {
     id: "monster-claw",
@@ -502,15 +526,15 @@ export const LEVELS = Object.freeze({
     { name: "Curry Goblin", maxHp: 500, atk: 70, color: "#657d2f", accent: "#f5ad0f", asset: "./assets/enemies/curry-goblin.webp", moves: ["sauce-swipe", "curry-splash"] },
     { name: "Root Curry Brute", maxHp: 700, atk: 78, color: "#a9601d", accent: "#8cad2d", asset: "./assets/enemies/root-curry-brute.webp", moves: ["root-bash", "gravy-snare"] },
     { name: "Sporeback Brute", maxHp: 900, atk: 86, color: "#557329", accent: "#c7b274", asset: "./assets/enemies/sporeback-brute.webp", moves: ["spore-punch", "mushroom-haze", "fungal-guard"] },
-    { name: "Blaze Fiend", maxHp: 1580, atk: 94, color: "#e84c0f", accent: "#ffd44d", asset: "./assets/enemies/blaze-fiend.webp", moves: ["flame-claw", "ember-crush", "wildfire-roar"] },
-    { name: "Blazeborn Overlord", maxHp: 1900, atk: 104, color: "#b92813", accent: "#ff8a19", asset: "./assets/enemies/blaze-fiend.webp", moves: ["inferno-stomp", "wildfire-roar", "molten-guard"] }
+    { name: "Rotten Goblin", maxHp: 1180, atk: 90, color: "#718147", accent: "#b9b68b", asset: "./assets/enemies/rotten-goblin.webp", moves: ["filthy-swipe", "noxious-stench", "sludge-guard"] },
+    { name: "Blaze Fiend", maxHp: 1580, atk: 94, color: "#e84c0f", accent: "#ffd44d", asset: "./assets/enemies/blaze-fiend.webp", moves: ["flame-claw", "ember-crush", "wildfire-roar"] }
   ],
   multiplayer: [
     { name: "Curry Goblin", maxHp: 1400, atk: 82, color: "#657d2f", accent: "#f5ad0f", asset: "./assets/enemies/curry-goblin.webp", moves: ["sauce-swipe", "curry-splash", "curry-cloud"] },
     { name: "Root Curry Brute", maxHp: 1780, atk: 92, color: "#a9601d", accent: "#8cad2d", asset: "./assets/enemies/root-curry-brute.webp", moves: ["root-bash", "gravy-snare", "root-guard"] },
     { name: "Sporeback Brute", maxHp: 2180, atk: 102, color: "#557329", accent: "#c7b274", asset: "./assets/enemies/sporeback-brute.webp", moves: ["spore-punch", "mushroom-haze", "fungal-guard"] },
-    { name: "Blaze Fiend", maxHp: 2650, atk: 112, color: "#e84c0f", accent: "#ffd44d", asset: "./assets/enemies/blaze-fiend.webp", moves: ["flame-claw", "ember-crush", "wildfire-roar"] },
-    { name: "Blazeborn Overlord", maxHp: 3200, atk: 124, color: "#b92813", accent: "#ff8a19", asset: "./assets/enemies/blaze-fiend.webp", moves: ["inferno-stomp", "wildfire-roar", "molten-guard"] }
+    { name: "Rotten Goblin", maxHp: 2420, atk: 107, color: "#718147", accent: "#b9b68b", asset: "./assets/enemies/rotten-goblin.webp", moves: ["filthy-swipe", "noxious-stench", "sludge-guard"] },
+    { name: "Blaze Fiend", maxHp: 2650, atk: 112, color: "#e84c0f", accent: "#ffd44d", asset: "./assets/enemies/blaze-fiend.webp", moves: ["flame-claw", "ember-crush", "wildfire-roar"] }
   ]
 });
 

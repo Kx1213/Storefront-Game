@@ -1,6 +1,6 @@
 import { get, onValue, ref, serverTimestamp, set, update } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 import { db } from "./firebase.js";
-import { getMove, getMoves } from "./game-data.js";
+import { getLevelCount, getMove, getMoves } from "./game-data.js?v=20260722-animation-perf2";
 import {
   buildMonster,
   buildPlayer,
@@ -13,7 +13,7 @@ import {
   hpPercent,
   listCharacters,
   sanitizeGameId
-} from "./shared.js";
+} from "./shared.js?v=20260722-animation-perf2";
 
 const $ = (id) => document.getElementById(id);
 const panels = {
@@ -248,7 +248,7 @@ function renderGameOver(state) {
   const playersWon = state.winner === "players";
   elements.phoneWinnerText.textContent = playersWon ? "You won!" : "You lost";
   elements.phoneGameOverMessage.textContent = playersWon
-    ? "Your curry party cleared all five levels."
+    ? `Your curry party cleared all ${getLevelCount(state.mode || "solo")} levels.`
     : "The monster won. Try a different character combination.";
 }
 

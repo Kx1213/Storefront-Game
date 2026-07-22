@@ -5,16 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Monster Curry Storefront Battle</title>
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="./styles.css?v=20260719-transparent1">
+    <link rel="stylesheet" href="./styles.css?v=20260721-move-label1">
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-    <script type="module" src="./src/screen.js?v=20260719-transparent2"></script>
+    <script type="module" src="./src/screen.js?v=20260722-animation-perf2"></script>
   </head>
   <body class="screen-page">
     <main class="screen-app">
       <section id="attractView" class="display-view attract-view">
-        <video id="attractVideo" class="attract-video" autoplay muted loop playsinline>
-          <source src="./assets/gameplay-loop.mp4" type="video/mp4">
-        </video>
         <div class="video-fallback" aria-hidden="true"></div>
         <div class="screen-scrim" aria-hidden="true"></div>
 
@@ -88,10 +85,10 @@
 
       <section id="battleView" class="display-view battle-view" hidden>
         <video id="battleBackgroundVideoA" class="battle-background-video is-active" muted playsinline preload="none" aria-hidden="true">
-          <source src="./assets/battle-background.mp4?v=20260715-1350" type="video/mp4">
+          <source src="./assets/battle-background.mp4?v=20260722-perf1" type="video/mp4">
         </video>
         <video id="battleBackgroundVideoB" class="battle-background-video" muted playsinline preload="none" aria-hidden="true">
-          <source src="./assets/battle-background.mp4?v=20260715-1350" type="video/mp4">
+          <source src="./assets/battle-background.mp4?v=20260722-perf1" type="video/mp4">
         </video>
         <div class="battle-background-scrim" aria-hidden="true"></div>
         <div class="live-battle-fx" aria-live="polite" aria-atomic="true">

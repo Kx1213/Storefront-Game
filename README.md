@@ -10,9 +10,9 @@ Static HTML/CSS/JavaScript storefront battle prototype. The big screen shows a t
 - First player sees "Waiting for other players to join" and can press `Start Single Player`.
 - If a second player enters the code before the solo battle starts, the game switches to co-op automatically.
 - Added 5 solo levels and 5 harder co-op levels.
-- Replaced the generic monster art with four enemy designs: Curry Goblin, Root Curry Brute, Sporeback Brute, and Blaze Fiend.
-- Added enemy-specific move sets and uses an upgraded Blaze Fiend form, Blazeborn Overlord, for the fifth encounter.
-- Added on-demand MP4 move animations for Katsu-Chan, Giga Nomu, Tamago Puffy, and Cheezu Mellow without preloading the full animation library.
+- Replaced the generic monster art with five enemy designs: Curry Goblin, Root Curry Brute, Sporeback Brute, Rotten Goblin, and Blaze Fiend.
+- Added enemy-specific move sets for all five encounters, culminating in Blaze Fiend.
+- Added on-demand transparent WebM move animations with optimized MP4 fallbacks for all eight playable characters, without preloading the full animation library.
 - Battle is cooperative: 1 or 2 players fight the monster, reduce monster HP to 0, and advance through levels.
 - The big screen uses a fixed 577×1439 design canvas and scales it uniformly, so every display with the same ratio has the same composition.
 - The screen creates a random four-digit game code and replaces it after each completed game.
@@ -44,15 +44,9 @@ D:\Monster-Curry-Personality-Prototype-Website-Prototype
 
 Serve that website separately, tap the floating `Battle` button, and enter the storefront game code. The website only accepts an active four-digit session created by the big screen.
 
-## Attract Video
+## Attract Background
 
-Put your looping MP4 at:
-
-```text
-assets/gameplay-loop.mp4
-```
-
-If the MP4 is missing, the screen shows a simple branded background while keeping the idle center clear for the trailer area.
+The attract screen uses the built-in branded background and simulated battle preview. It does not request a missing trailer file, which keeps startup fast and avoids a failed media request.
 
 ## Firebase
 

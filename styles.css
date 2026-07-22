@@ -42,23 +42,25 @@ button:disabled {
 }
 
 .screen-page {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
+  position: fixed;
+  inset: 0;
+  width: auto;
+  height: auto;
+  min-height: 0;
   overflow: hidden;
   background: #151515;
 }
 
 .screen-page .screen-app {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: var(--screen-y, 0px);
+  left: var(--screen-x, 0px);
   width: 577px;
   height: 1439px;
   min-height: 0;
   overflow: hidden;
-  transform: translate(-50%, -50%) scale(var(--screen-scale, 1));
-  transform-origin: center;
+  transform: scale(var(--screen-scale, 1));
+  transform-origin: top left;
 }
 
 .screen-page .display-view {
@@ -534,7 +536,7 @@ button:disabled {
 
 .live-battle-move {
   position: absolute;
-  top: 32%;
+  top: 25%;
   left: 50%;
   width: min(88%, 480px);
   padding: 15px 22px;
