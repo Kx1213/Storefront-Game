@@ -5,14 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Monster Curry Storefront Battle</title>
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="./styles.css?v=20260721-move-label1">
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-    <script type="module" src="./src/screen.js?v=20260722-animation-perf2"></script>
+    <link rel="preload" href="./assets/backgrounds/curry-goblin.webp?v=20260724-idle-perf2" as="image" type="image/webp" fetchpriority="high">
+    <link rel="stylesheet" href="./styles.css?v=20260724-idle-perf2">
+    <script async src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <script type="module" src="./src/screen.js?v=20260724-idle-perf2"></script>
   </head>
   <body class="screen-page">
     <main class="screen-app">
       <section id="attractView" class="display-view attract-view">
         <div class="video-fallback" aria-hidden="true"></div>
+        <div id="idleBattleBackground" class="idle-battle-background" aria-hidden="true"></div>
         <div class="screen-scrim" aria-hidden="true"></div>
 
         <div class="portrait-shell attract-shell">
@@ -31,7 +33,8 @@
             <section class="idle-battle-stage" aria-label="Simulated Monster Curry battle preview">
               <div class="idle-battle-arena">
                 <article id="idlePlayerFighter" class="idle-fighter idle-player-fighter">
-                  <img id="idlePlayerArt" src="./assets/characters/katsu-chan.png" alt="Katsu-Chan" decoding="async" fetchpriority="high">
+                  <img id="idlePlayerArt" src="./assets/characters/idle/katsu-chan.webp" alt="Katsu-Chan" decoding="async" fetchpriority="high">
+                  <video id="idleMoveAnimation" class="attack-animation move-animation idle-fighter-animation" muted playsinline preload="none" aria-hidden="true"></video>
                 </article>
 
                 <div class="idle-impact-wrap" aria-hidden="true">

@@ -76,6 +76,7 @@ button:disabled {
 
 .attract-video,
 .video-fallback,
+.idle-battle-background,
 .screen-scrim {
   position: absolute;
   inset: 0;
@@ -91,13 +92,22 @@ button:disabled {
 .video-fallback {
   z-index: 0;
   background:
-    linear-gradient(180deg, rgba(237, 29, 36, 0.86), rgba(245, 173, 15, 0.72)),
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 62px);
+    radial-gradient(circle at 50% 39%, rgba(32, 192, 177, 0.3), transparent 28%),
+    radial-gradient(circle at 50% 84%, rgba(121, 65, 178, 0.28), transparent 34%),
+    linear-gradient(180deg, #07152d, #102949 48%, #2b1747);
+}
+
+.idle-battle-background {
+  z-index: 1;
+  background-image: url("./assets/backgrounds/curry-goblin.webp?v=20260724-idle-perf2");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .screen-scrim {
   z-index: 2;
-  background: linear-gradient(180deg, rgba(21, 21, 21, 0.58), rgba(21, 21, 21, 0.05) 42%, rgba(21, 21, 21, 0.76));
+  background: linear-gradient(180deg, rgba(3, 9, 22, 0.56), rgba(3, 9, 22, 0.14) 42%, rgba(3, 7, 18, 0.76));
 }
 
 .portrait-shell {
@@ -196,12 +206,28 @@ button:disabled {
 }
 
 .idle-fighter img {
-  width: 118%;
+  width: 300px;
   max-width: none;
-  height: 530px;
+  height: 300px;
   object-fit: contain;
   object-position: center;
   filter: drop-shadow(0 18px 18px rgba(0, 0, 0, 0.44));
+}
+
+.idle-player-fighter img {
+  position: relative;
+  left: -46px;
+  width: 320px;
+  height: 320px;
+  animation: idle-player-breathe 1050ms ease-in-out infinite alternate;
+}
+
+.idle-player-fighter {
+  left: -12px;
+}
+
+.idle-monster-fighter img {
+  animation: idle-monster-breathe 1250ms ease-in-out infinite alternate;
 }
 
 .idle-impact-wrap {
@@ -213,6 +239,8 @@ button:disabled {
 }
 
 .idle-versus {
+  position: relative;
+  top: -82px;
   display: grid;
   place-items: center;
   width: 58px;
@@ -292,9 +320,9 @@ button:disabled {
 }
 
 @keyframes idle-hit {
-  0%, 100% { transform: translateX(0); filter: brightness(1); }
-  18% { transform: translateX(-8px) rotate(-3deg); filter: brightness(2.2) saturate(0); }
-  36% { transform: translateX(8px) rotate(3deg); }
+  0%, 100% { opacity: 1; transform: translateX(0); }
+  18% { opacity: 0.62; transform: translateX(-8px) rotate(-3deg); }
+  36% { opacity: 1; transform: translateX(8px) rotate(3deg); }
   54% { transform: translateX(-5px) rotate(-2deg); }
   72% { transform: translateX(4px) rotate(1deg); }
 }
@@ -304,10 +332,20 @@ button:disabled {
   to { transform: translateY(-14px) scale(1.06); }
 }
 
+@keyframes idle-player-breathe {
+  from { transform: translateY(4px) rotate(-1deg); }
+  to { transform: translateY(-7px) rotate(1deg); }
+}
+
+@keyframes idle-monster-breathe {
+  from { transform: translateY(5px) rotate(1deg) scale(0.99); }
+  to { transform: translateY(-8px) rotate(-1deg) scale(1.02); }
+}
+
 @keyframes fighter-death {
-  0% { opacity: 1; filter: grayscale(0) brightness(1) drop-shadow(0 18px 18px rgba(0, 0, 0, 0.44)); transform: translateY(0) scale(1); }
-  45% { opacity: 0.82; filter: grayscale(1) brightness(0.72) drop-shadow(0 10px 12px rgba(0, 0, 0, 0.34)); transform: translateY(8px) scale(0.98); }
-  100% { opacity: 0; filter: grayscale(1) brightness(0.38) drop-shadow(0 0 0 transparent); transform: translateY(42px) scale(0.82); }
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  45% { opacity: 0.72; transform: translateY(8px) scale(0.98); }
+  100% { opacity: 0; transform: translateY(42px) scale(0.82); }
 }
 
 .brand-bar {
@@ -534,6 +572,25 @@ button:disabled {
   visibility: visible;
 }
 
+.idle-player-fighter .idle-fighter-animation {
+  top: 50%;
+  left: 50%;
+  z-index: 5;
+  width: 320px;
+  max-width: none;
+  height: 320px;
+  object-fit: contain;
+  transform: translate(-50%, -50%);
+}
+
+.idle-player-fighter:has(.idle-fighter-animation.is-playing) #idlePlayerArt {
+  opacity: 0;
+}
+
+#idlePlayerArt {
+  transition: opacity 80ms linear;
+}
+
 .live-battle-move {
   position: absolute;
   top: 25%;
@@ -615,6 +672,12 @@ button:disabled {
   align-items: center;
   justify-content: space-between;
   gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.36);
+  border-radius: 10px;
+  background: rgba(7, 10, 17, 0.82);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.34);
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.92);
 }
 
 .battle-topbar strong {
@@ -627,9 +690,9 @@ button:disabled {
   justify-items: center;
   min-width: 68px;
   padding: 8px 12px;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(255, 255, 255, 0.42);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.46);
 }
 
 .turn-badge strong {
@@ -658,10 +721,12 @@ button:disabled {
   gap: 8px;
   min-width: 0;
   padding: 10px;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(255, 255, 255, 0.42);
   border-bottom: 5px solid var(--fighter-accent);
   border-radius: 8px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.05));
+  background: linear-gradient(180deg, rgba(9, 12, 19, 0.9), rgba(7, 9, 15, 0.78));
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.34);
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.94);
 }
 
 .combat-card.down > :not(.combat-art) {
@@ -711,9 +776,9 @@ button:disabled {
   width: 100%;
   height: 18px;
   overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.44);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.24);
+  background: rgba(0, 0, 0, 0.58);
 }
 
 .hp-fill {
@@ -730,19 +795,27 @@ button:disabled {
   z-index: 1;
   display: grid;
   place-items: center;
-  color: #111;
+  color: #fff;
   font-size: 13.12px;
   line-height: 1;
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.72);
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 1),
+    1px 0 1px rgba(0, 0, 0, 0.94),
+    -1px 0 1px rgba(0, 0, 0, 0.94);
 }
 
 .combat-art {
   justify-self: center;
   width: 100%;
-  max-width: 190px;
-  max-height: 180px;
+  max-width: 230px;
+  height: 240px;
+  max-height: none;
   object-fit: contain;
   filter: drop-shadow(0 20px 20px rgba(0, 0, 0, 0.34));
+}
+
+.player-card .combat-art {
+  scale: 1.14;
 }
 
 .monster-card {
@@ -764,23 +837,19 @@ button:disabled {
   width: 100%;
 }
 
-.monster-art {
-  max-width: 260px;
-  max-height: 275px;
-}
-
 .effect-line,
 .locked-move,
 .last-moves {
   min-height: 20px;
-  color: rgba(255, 247, 232, 0.86);
+  color: #fff8e9;
   font-size: 15.2px;
   font-weight: 800;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.96);
 }
 
 .locked-move,
 .last-moves {
-  color: var(--gold);
+  color: #ffda70;
 }
 
 .screen-message {
@@ -789,9 +858,10 @@ button:disabled {
   gap: 8px;
   min-height: 170px;
   padding: 22px;
-  border: 2px solid rgba(255, 247, 232, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.54);
   border-radius: 8px;
-  background: rgba(0, 0, 0, 0.32);
+  background: rgba(7, 9, 15, 0.84);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.38);
   text-align: center;
 }
 
@@ -801,6 +871,7 @@ button:disabled {
   font-size: 29.12px;
   font-weight: 1000;
   line-height: 1.08;
+  text-shadow: 0 3px 7px rgba(0, 0, 0, 0.98);
 }
 
 .battle-log {
@@ -810,9 +881,11 @@ button:disabled {
 
 .battle-log p {
   margin: 0;
-  color: rgba(255, 247, 232, 0.78);
+  color: #fff8ea;
   font-size: 16px;
+  font-weight: 750;
   line-height: 1.22;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.96);
 }
 
 .mini-code {

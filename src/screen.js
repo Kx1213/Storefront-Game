@@ -1,7 +1,5 @@
-import { get, onValue, ref, remove, serverTimestamp, set, update } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
-import { db } from "./firebase.js";
-import { allAlivePlayersHaveMoves, prepareNextLevel, resolveRound } from "./battle-engine.js?v=20260722-animation-perf2";
-import { CHARACTERS, LEVELS, getLevelCount, getMove } from "./game-data.js?v=20260722-animation-perf2";
+import { allAlivePlayersHaveMoves, prepareNextLevel, resolveRound } from "./battle-engine.js?v=20260724-idle-perf2";
+import { CHARACTERS, LEVELS, getLevelCount, getMove } from "./game-data.js?v=20260724-idle-perf2";
 import {
   createAttractSession,
   formatGameCode,
@@ -10,7 +8,16 @@ import {
   getLobbyEntries,
   getOrderedPlayers,
   hpPercent
-} from "./shared.js?v=20260722-animation-perf2";
+} from "./shared.js?v=20260724-idle-perf2";
+
+let get;
+let onValue;
+let ref;
+let remove;
+let serverTimestamp;
+let set;
+let update;
+let db;
 
 const DESIGN_WIDTH = 577;
 const DESIGN_HEIGHT = 1439;
@@ -18,6 +25,9 @@ const SCREEN_GAME_STORAGE_KEY = "storefront-screen-game";
 const BATTLE_BACKGROUND_HANDOFF_LEAD_SECONDS = 0.16;
 const MOVE_ANIMATION_FALLBACK_TIMEOUT_MS = 1600;
 const MOVE_ANIMATION_VERSION = "20260722-animation-perf2";
+const IDLE_ANIMATION_VERSION = "20260724-idle-perf2";
+const IDLE_BACKGROUND_VERSION = "20260724-idle-perf2";
+const LIVE_MOVE_ANIMATION_SPACING_MS = 940;
 const WEBSITE_URL = "https://reito-bt.github.io/Monster-Curry-Personality-Prototype-Website/";
 const IDLE_IMPACT_WORDS = ["BAM!", "SIZZLE!", "CRUNCH!", "POW!", "SLASH!", "BOOM!"];
 
@@ -29,9 +39,11 @@ const elements = {
   gameOverView: $("gameOverView"),
   websiteQr: $("websiteQr"),
   websiteQrFallback: $("websiteQrFallback"),
+  idleBattleBackground: $("idleBattleBackground"),
   idleBattleMove: $("idleBattleMove"),
   idlePlayerFighter: $("idlePlayerFighter"),
   idlePlayerArt: $("idlePlayerArt"),
+  idleMoveAnimation: $("idleMoveAnimation"),
   idleMonsterFighter: $("idleMonsterFighter"),
   idleMonsterArt: $("idleMonsterArt"),
   monsterCard: $("monsterCard"),
@@ -82,9 +94,11 @@ let battleBackgroundMonitor = null;
 let battleBackgroundPreload = null;
 let idleBattleTimer = null;
 let idleBattleState = null;
+let idleCharacterCursor = 0;
+let idleMonsterCursor = 0;
+let idleBackgroundRequest = 0;
+let idleBackgroundWarmTimer = null;
 let liveBattleAnimationToken = null;
-let moveAnimationRequest = 0;
-let moveAnimationFallbackTimer = null;
 let screenScaleFrame = null;
 let lastBattleSnapshot = null;
 let gameOverRevealTimer = null;
@@ -93,9 +107,19 @@ const warmedMoveAnimations = new Set();
 const warmingMoveAnimations = new Set();
 const queuedMoveAnimations = new Set();
 const moveAnimationWarmQueue = [];
+const idleBackgroundPreloads = new Map();
+const idleElementAnimationStates = new WeakMap();
+const moveAnimationPlaybackStates = new WeakMap();
 let moveAnimationWarmQueueRunning = false;
 const transparentMoveAnimationsSupported = Boolean(
   elements.moveAnimation?.canPlayType('video/webm; codecs="vp9"')
+);
+const networkInformation = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+const idleVideoAnimationsEnabled = Boolean(
+  transparentMoveAnimationsSupported
+  && !networkInformation?.saveData
+  && !["slow-2g", "2g"].includes(networkInformation?.effectiveType)
+  && !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
 );
 
 function updateScreenScale() {
@@ -188,15 +212,122 @@ function renderWebsiteQr() {
   elements.websiteQrFallback.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(WEBSITE_URL)}`;
 }
 
+async function connectFirebase() {
+  const [databaseModule, firebaseModule] = await Promise.all([
+    import("https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js"),
+    import("./firebase.js")
+  ]);
+
+  ({
+    get,
+    onValue,
+    ref,
+    remove,
+    serverTimestamp,
+    set,
+    update
+  } = databaseModule);
+  db = firebaseModule.db;
+}
+
+function clearIdleElementAnimations(element) {
+  if (!element) {
+    return;
+  }
+
+  const states = idleElementAnimationStates.get(element);
+  if (!states) {
+    return;
+  }
+
+  states.forEach((state, className) => {
+    window.cancelAnimationFrame(state.frame);
+    window.clearTimeout(state.timer);
+    element.classList.remove(className);
+  });
+  idleElementAnimationStates.delete(element);
+}
+
 function animateIdleElement(element, className, duration = 720) {
   if (!element) {
     return;
   }
 
+  let states = idleElementAnimationStates.get(element);
+  if (!states) {
+    states = new Map();
+    idleElementAnimationStates.set(element, states);
+  }
+
+  const previousState = states.get(className);
+  window.cancelAnimationFrame(previousState?.frame);
+  window.clearTimeout(previousState?.timer);
   element.classList.remove(className);
-  void element.offsetWidth;
-  element.classList.add(className);
-  window.setTimeout(() => element.classList.remove(className), duration);
+  const state = { frame: null, timer: null };
+  states.set(className, state);
+  state.frame = window.requestAnimationFrame(() => {
+    state.frame = window.requestAnimationFrame(() => {
+      state.frame = null;
+      element.classList.add(className);
+      state.timer = window.setTimeout(() => {
+        element.classList.remove(className);
+        states.delete(className);
+        if (states.size === 0) {
+          idleElementAnimationStates.delete(element);
+        }
+      }, duration);
+    });
+  });
+}
+
+function idleBackgroundUrl(backgroundPath) {
+  if (!backgroundPath) {
+    return null;
+  }
+
+  const url = new URL(backgroundPath, window.location.href);
+  url.searchParams.set("v", IDLE_BACKGROUND_VERSION);
+  return url.href;
+}
+
+function preloadIdleBackground(backgroundPath) {
+  const sourceUrl = idleBackgroundUrl(backgroundPath);
+  if (!sourceUrl) {
+    return Promise.resolve(null);
+  }
+
+  if (!idleBackgroundPreloads.has(sourceUrl)) {
+    const preload = new Promise((resolve) => {
+      const image = new Image();
+      image.decoding = "async";
+      image.addEventListener("load", () => resolve(sourceUrl), { once: true });
+      image.addEventListener("error", () => {
+        idleBackgroundPreloads.delete(sourceUrl);
+        resolve(null);
+      }, { once: true });
+      image.src = sourceUrl;
+    });
+    idleBackgroundPreloads.set(sourceUrl, preload);
+  }
+
+  return idleBackgroundPreloads.get(sourceUrl);
+}
+
+function updateIdleBattleBackground(backgroundPath) {
+  const sourceUrl = idleBackgroundUrl(backgroundPath);
+  if (!sourceUrl || elements.idleBattleBackground.dataset.sourceUrl === sourceUrl) {
+    return;
+  }
+
+  const requestId = ++idleBackgroundRequest;
+  void preloadIdleBackground(backgroundPath).then((loadedUrl) => {
+    if (!loadedUrl || requestId !== idleBackgroundRequest || elements.attractView.hidden) {
+      return;
+    }
+
+    elements.idleBattleBackground.style.backgroundImage = `url("${loadedUrl}")`;
+    elements.idleBattleBackground.dataset.sourceUrl = loadedUrl;
+  });
 }
 
 function updateIdleBattleDisplay() {
@@ -205,10 +336,13 @@ function updateIdleBattleDisplay() {
     return;
   }
 
-  elements.idlePlayerArt.src = state.character.asset;
+  elements.idlePlayerArt.src = state.character.idleAsset || state.character.asset;
   elements.idlePlayerArt.alt = state.character.name;
+  elements.idlePlayerFighter.dataset.characterId = state.character.id;
   elements.idleMonsterArt.src = state.monster.asset;
   elements.idleMonsterArt.alt = state.monster.name;
+  elements.idleMonsterFighter.dataset.monsterName = state.monster.name;
+  updateIdleBattleBackground(state.monster.idleBackground);
 }
 
 function showIdleBattleMove(moveName) {
@@ -225,20 +359,43 @@ function scheduleIdleBattleStep(delay) {
 }
 
 function resetIdleBattle() {
-  const character = randomItem(CHARACTERS);
-  const monster = randomItem(LEVELS.solo);
+  const character = CHARACTERS[idleCharacterCursor % CHARACTERS.length];
+  const monster = LEVELS.solo[idleMonsterCursor % LEVELS.solo.length];
+  const playerMove = getMove(character.moves[0]);
+  const playerAnimationMove = playerMove && character.idleAnimation
+    ? { ...playerMove, animation: character.idleAnimation }
+    : null;
+  idleCharacterCursor = (idleCharacterCursor + 1) % CHARACTERS.length;
+  idleMonsterCursor = (idleMonsterCursor + 1) % LEVELS.solo.length;
   idleBattleState = {
     character,
     monster,
+    playerMove,
+    playerAnimationMove,
+    playerAnimationShown: false,
     playerHp: 100,
     monsterHp: 100,
-    playerTurn: Math.random() >= 0.35
+    playerTurn: true
   };
 
+  clearMoveAnimationPlayback(elements.idleMoveAnimation);
+  clearIdleElementAnimations(elements.idleBattleMove);
+  clearIdleElementAnimations(elements.idlePlayerFighter);
+  clearIdleElementAnimations(elements.idleMonsterFighter);
   elements.idlePlayerFighter.classList.remove("is-attacking", "is-hit", "is-victorious", "is-defeated");
   elements.idleMonsterFighter.classList.remove("is-attacking", "is-hit", "is-victorious", "is-defeated");
   showIdleBattleMove(`${character.name} enters the arena!`);
   updateIdleBattleDisplay();
+  if (idleVideoAnimationsEnabled && playerAnimationMove) {
+    warmMoveAnimation(playerAnimationMove);
+  }
+  window.clearTimeout(idleBackgroundWarmTimer);
+  idleBackgroundWarmTimer = window.setTimeout(() => {
+    idleBackgroundWarmTimer = null;
+    if (idleBattleState?.character === character && !document.hidden && !elements.attractView.hidden) {
+      void preloadIdleBackground(LEVELS.solo[idleMonsterCursor % LEVELS.solo.length]?.idleBackground);
+    }
+  }, 1400);
 }
 
 function runIdleBattleStep() {
@@ -254,8 +411,9 @@ function runIdleBattleStep() {
   const playerAttacks = state.playerTurn;
   const attacker = playerAttacks ? elements.idlePlayerFighter : elements.idleMonsterFighter;
   const defender = playerAttacks ? elements.idleMonsterFighter : elements.idlePlayerFighter;
-  const moveIds = playerAttacks ? state.character.moves : state.monster.moves;
-  const move = getMove(randomItem(moveIds));
+  const move = playerAttacks
+    ? state.playerMove
+    : getMove(randomItem(state.monster.moves));
   const damage = Math.floor(15 + Math.random() * 18);
 
   if (playerAttacks) {
@@ -265,6 +423,10 @@ function runIdleBattleStep() {
   }
 
   showIdleBattleMove(move?.name || "Power attack");
+  if (playerAttacks && !state.playerAnimationShown && idleVideoAnimationsEnabled && state.playerAnimationMove) {
+    state.playerAnimationShown = true;
+    playMoveAnimation(state.playerAnimationMove, elements.idleMoveAnimation, true);
+  }
   animateIdleElement(attacker, "is-attacking");
   animateIdleElement(defender, "is-hit", 560);
   updateIdleBattleDisplay();
@@ -297,8 +459,15 @@ function startIdleBattle() {
 
 function stopIdleBattle() {
   window.clearTimeout(idleBattleTimer);
+  window.clearTimeout(idleBackgroundWarmTimer);
   idleBattleTimer = null;
+  idleBackgroundWarmTimer = null;
   idleBattleState = null;
+  idleBackgroundRequest += 1;
+  clearMoveAnimationPlayback(elements.idleMoveAnimation);
+  clearIdleElementAnimations(elements.idleBattleMove);
+  clearIdleElementAnimations(elements.idlePlayerFighter);
+  clearIdleElementAnimations(elements.idleMonsterFighter);
   elements.idlePlayerFighter.classList.remove("is-attacking", "is-hit", "is-victorious", "is-defeated");
   elements.idleMonsterFighter.classList.remove("is-attacking", "is-hit", "is-victorious", "is-defeated");
 }
@@ -311,26 +480,44 @@ function scheduleLiveBattleAnimation(callback, delay) {
   liveBattleTimers.add(timer);
 }
 
+function getMoveAnimationPlaybackState(video) {
+  if (!moveAnimationPlaybackStates.has(video)) {
+    moveAnimationPlaybackStates.set(video, {
+      fallbackTimer: null,
+      requestId: 0
+    });
+  }
+
+  return moveAnimationPlaybackStates.get(video);
+}
+
+function clearMoveAnimationPlayback(video) {
+  if (!video) {
+    return;
+  }
+
+  const playback = getMoveAnimationPlaybackState(video);
+  window.clearTimeout(playback.fallbackTimer);
+  playback.fallbackTimer = null;
+  playback.requestId += 1;
+  video.pause();
+  video.oncanplay = null;
+  video.onerror = null;
+  video.classList.remove("is-playing", "has-transparent-source");
+  if (video.getAttribute("src")) {
+    video.removeAttribute("src");
+    video.load();
+  }
+}
+
 function clearLiveBattleAnimations() {
   liveBattleTimers.forEach((timer) => window.clearTimeout(timer));
   liveBattleTimers.clear();
   liveBattleAnimationToken = null;
   lastBattleSnapshot = null;
-  window.clearTimeout(moveAnimationFallbackTimer);
-  moveAnimationFallbackTimer = null;
   elements.liveBattleMove.classList.remove("is-showing");
   elements.liveBattleImpact.classList.remove("is-bursting");
-  moveAnimationRequest += 1;
-  if (elements.moveAnimation) {
-    elements.moveAnimation.pause();
-    elements.moveAnimation.oncanplay = null;
-    elements.moveAnimation.onerror = null;
-    elements.moveAnimation.classList.remove("is-playing", "has-transparent-source");
-    if (elements.moveAnimation.getAttribute("src")) {
-      elements.moveAnimation.removeAttribute("src");
-      elements.moveAnimation.load();
-    }
-  }
+  clearMoveAnimationPlayback(elements.moveAnimation);
 }
 
 function getPlayerBattleCard(playerId) {
@@ -356,7 +543,12 @@ function moveAnimationUrl(move, transparent = transparentMoveAnimationsSupported
     ? move.animation.replace(/\.mp4$/i, ".webm")
     : move.animation;
   const url = new URL(animationPath, window.location.href);
-  url.searchParams.set("v", MOVE_ANIMATION_VERSION);
+  url.searchParams.set(
+    "v",
+    animationPath.includes("/animations/idle/")
+      ? IDLE_ANIMATION_VERSION
+      : MOVE_ANIMATION_VERSION
+  );
   return url.href;
 }
 
@@ -403,8 +595,14 @@ async function drainMoveAnimationWarmQueue() {
   }
 }
 
-function warmMoveAnimation(move, { urgent = false } = {}) {
-  const sourceUrl = moveAnimationUrl(move);
+function warmMoveAnimation(
+  move,
+  {
+    urgent = false,
+    transparent = transparentMoveAnimationsSupported
+  } = {}
+) {
+  const sourceUrl = moveAnimationUrl(move, transparent);
   if (!sourceUrl || warmedMoveAnimations.has(sourceUrl) || warmingMoveAnimations.has(sourceUrl)) {
     return;
   }
@@ -449,36 +647,40 @@ function warmSelectedCharacterAnimations(state) {
   });
 }
 
-function playMoveAnimation(move) {
-  const video = elements.moveAnimation;
+function playMoveAnimation(
+  move,
+  video = elements.moveAnimation,
+  preferTransparency = transparentMoveAnimationsSupported
+) {
   if (!video || !move?.animation) {
     return;
   }
 
-  window.clearTimeout(moveAnimationFallbackTimer);
-  moveAnimationFallbackTimer = null;
-  const requestId = ++moveAnimationRequest;
+  const playback = getMoveAnimationPlaybackState(video);
+  window.clearTimeout(playback.fallbackTimer);
+  playback.fallbackTimer = null;
+  const requestId = ++playback.requestId;
   const transparentUrl = moveAnimationUrl(move, true);
   const fallbackUrl = moveAnimationUrl(move, false);
+  const useTransparentSource = Boolean(preferTransparency && transparentMoveAnimationsSupported);
 
   const startPlayback = (sourceUrl, usesTransparency) => {
-    if (requestId !== moveAnimationRequest || video.src !== sourceUrl) {
+    if (requestId !== playback.requestId || video.src !== sourceUrl) {
       return;
     }
 
-    window.clearTimeout(moveAnimationFallbackTimer);
-    moveAnimationFallbackTimer = null;
+    window.clearTimeout(playback.fallbackTimer);
+    playback.fallbackTimer = null;
     video.oncanplay = null;
     video.onerror = null;
     video.pause();
     video.currentTime = 0;
     video.classList.remove("is-playing");
     video.classList.toggle("has-transparent-source", usesTransparency);
-    void video.offsetWidth;
     video.classList.add("is-playing");
     video.play()
       .catch(() => {
-        if (requestId !== moveAnimationRequest) {
+        if (requestId !== playback.requestId) {
           return;
         }
 
@@ -491,18 +693,18 @@ function playMoveAnimation(move) {
   };
 
   const loadSource = (sourceUrl, usesTransparency) => {
-    if (!sourceUrl || requestId !== moveAnimationRequest) {
+    if (!sourceUrl || requestId !== playback.requestId) {
       return;
     }
 
-    window.clearTimeout(moveAnimationFallbackTimer);
-    moveAnimationFallbackTimer = null;
+    window.clearTimeout(playback.fallbackTimer);
+    playback.fallbackTimer = null;
     video.pause();
     video.classList.remove("is-playing");
     video.classList.toggle("has-transparent-source", usesTransparency);
     video.oncanplay = () => startPlayback(sourceUrl, usesTransparency);
     video.onerror = () => {
-      if (requestId !== moveAnimationRequest) {
+      if (requestId !== playback.requestId) {
         return;
       }
 
@@ -524,9 +726,9 @@ function playMoveAnimation(move) {
 
     video.load();
     if (usesTransparency && fallbackUrl && fallbackUrl !== sourceUrl) {
-      moveAnimationFallbackTimer = window.setTimeout(() => {
-        moveAnimationFallbackTimer = null;
-        if (requestId === moveAnimationRequest && !video.classList.contains("is-playing")) {
+      playback.fallbackTimer = window.setTimeout(() => {
+        playback.fallbackTimer = null;
+        if (requestId === playback.requestId && !video.classList.contains("is-playing")) {
           loadSource(fallbackUrl, false);
         }
       }, MOVE_ANIMATION_FALLBACK_TIMEOUT_MS);
@@ -534,8 +736,8 @@ function playMoveAnimation(move) {
   };
 
   loadSource(
-    transparentMoveAnimationsSupported ? transparentUrl : fallbackUrl,
-    transparentMoveAnimationsSupported
+    useTransparentSource ? transparentUrl : fallbackUrl,
+    useTransparentSource
   );
 }
 
@@ -576,7 +778,7 @@ function animateResolvingMoves(state) {
       if (move.power || move.hits) {
         animateIdleElement(elements.monsterCard, "is-live-hit", 580);
       }
-    }, 120 + index * 780);
+    }, 120 + index * LIVE_MOVE_ANIMATION_SPACING_MS);
   });
 }
 
@@ -755,7 +957,7 @@ function setView(viewName) {
   elements.battleView.hidden = !battleIsActive;
   elements.gameOverView.hidden = viewName !== "game-over";
 
-  if (battleIsActive) {
+  if (battleIsActive && !document.hidden) {
     startBattleBackground();
   } else if (battleBackgroundRunning) {
     stopBattleBackground();
@@ -765,7 +967,7 @@ function setView(viewName) {
     clearLiveBattleAnimations();
   }
 
-  if (attractIsActive) {
+  if (attractIsActive && !document.hidden) {
     startIdleBattle();
   } else {
     stopIdleBattle();
@@ -1007,7 +1209,8 @@ async function resolvePendingMoves(state) {
     lastActionAt: serverTimestamp()
   });
 
-  const animationDelay = 1400 + Math.max(0, getAlivePlayerIds(state).length - 1) * 780;
+  const animationDelay = 1400
+    + Math.max(0, getAlivePlayerIds(state).length - 1) * LIVE_MOVE_ANIMATION_SPACING_MS;
 
   window.setTimeout(async () => {
     if (gameId !== activeGameId) {
@@ -1112,14 +1315,35 @@ async function boot() {
   window.visualViewport?.addEventListener("resize", scheduleScreenScaleUpdate);
   window.visualViewport?.addEventListener("scroll", scheduleScreenScaleUpdate);
   document.addEventListener("fullscreenchange", scheduleScreenScaleUpdate);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      stopIdleBattle();
+      if (battleBackgroundRunning) {
+        stopBattleBackground();
+      }
+      clearLiveBattleAnimations();
+      return;
+    }
+
+    if (!elements.attractView.hidden) {
+      startIdleBattle();
+    }
+    if (!elements.battleView.hidden) {
+      startBattleBackground();
+    }
+  });
   elements.battleBackgroundVideos.forEach((video, index) => {
     video.addEventListener("ended", () => handOffBattleBackground(index));
   });
-  elements.moveAnimation?.addEventListener("ended", () => {
-    elements.moveAnimation.classList.remove("is-playing");
-    elements.moveAnimation.currentTime = 0;
+  [elements.moveAnimation, elements.idleMoveAnimation].forEach((video) => {
+    video?.addEventListener("ended", () => {
+      video.classList.remove("is-playing");
+      video.currentTime = 0;
+    });
   });
   bindControls();
+
+  await connectFirebase();
 
   const requestedGameId = getGameId(null);
   const storedGameId = window.localStorage.getItem(SCREEN_GAME_STORAGE_KEY);

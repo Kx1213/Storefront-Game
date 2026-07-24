@@ -44,9 +44,11 @@ D:\Monster-Curry-Personality-Prototype-Website-Prototype
 
 Serve that website separately, tap the floating `Battle` button, and enter the storefront game code. The website only accepts an active four-digit session created by the big screen.
 
-## Attract Background
+## Attract and Battle Backgrounds
 
-The attract screen uses the built-in branded background and simulated battle preview. It does not request a missing trailer file, which keeps startup fast and avoids a failed media request.
+The unattended attract screen cycles through all five monsters. Each simulated fight uses the matching lightweight WebP environment from `assets/backgrounds`, while one upcoming scene is preloaded to keep the transition quick. The active QR-controlled game retains the original optimized `assets/battle-background.mp4` presentation.
+
+The idle preview also rotates through the playable characters and demonstrates one signature move per character. It uses dedicated 512 × 512 WebP character art plus 320 × 320 transparent clips, and plays each clip only on the first player attack of a simulated fight; later attacks use lightweight CSS motion. Only the current short clip is warmed, avoiding a full animation-library download at startup.
 
 ## Firebase
 

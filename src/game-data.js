@@ -439,6 +439,8 @@ export const CHARACTERS = Object.freeze([
     color: "#f08a24",
     accent: "#ffd15c",
     asset: "./assets/characters/katsu-chan.png",
+    idleAsset: "./assets/characters/idle/katsu-chan.webp",
+    idleAnimation: "./assets/animations/idle/katsu-chan.webm",
     moves: ["crispy-slash", "heros-courage", "comfort-meal", "counter-guard"]
   },
   {
@@ -450,6 +452,8 @@ export const CHARACTERS = Object.freeze([
     color: "#4c9a62",
     accent: "#ffcf5a",
     asset: "./assets/characters/monstora-sharemi.png",
+    idleAsset: "./assets/characters/idle/monstora-sharemi.webp",
+    idleAnimation: "./assets/animations/idle/monstora-sharemi.webm",
     moves: ["vine-whip", "sharing-feast", "rally-together", "tangling-vines"]
   },
   {
@@ -461,6 +465,8 @@ export const CHARACTERS = Object.freeze([
     color: "#9b5a2e",
     accent: "#f5ad0f",
     asset: "./assets/characters/giga-nomu.png",
+    idleAsset: "./assets/characters/idle/giga-nomu.webp",
+    idleAnimation: "./assets/animations/idle/giga-nomu.webm",
     moves: ["mega-chomp", "devour", "belly-shield", "hungry-challenge"]
   },
   {
@@ -472,6 +478,8 @@ export const CHARACTERS = Object.freeze([
     color: "#f7c746",
     accent: "#f67280",
     asset: "./assets/characters/tamago-puffy.png",
+    idleAsset: "./assets/characters/idle/tamago-puffy.webp",
+    idleAnimation: "./assets/animations/idle/tamago-puffy.webm",
     moves: ["egg-toss", "fluffy-hug", "sunny-side-up", "sweet-dreams"]
   },
   {
@@ -483,6 +491,8 @@ export const CHARACTERS = Object.freeze([
     color: "#f5ad0f",
     accent: "#ed1d24",
     asset: "./assets/characters/cheezu-mellow.png",
+    idleAsset: "./assets/characters/idle/cheezu-mellow.webp",
+    idleAnimation: "./assets/animations/idle/cheezu-mellow.webm",
     moves: ["cheese-wheel", "melted-cheese", "cover-up", "comfort-feast"]
   },
   {
@@ -494,6 +504,8 @@ export const CHARACTERS = Object.freeze([
     color: "#db8b41",
     accent: "#ffe48a",
     asset: "./assets/characters/ramy-noodleton.png",
+    idleAsset: "./assets/characters/idle/ramy-noodleton.webp",
+    idleAnimation: "./assets/animations/idle/ramy-noodleton.webm",
     moves: ["noodle-strike", "slurp-combo", "cold-broth", "finishing-slurp"]
   },
   {
@@ -505,6 +517,8 @@ export const CHARACTERS = Object.freeze([
     color: "#ed1d24",
     accent: "#f5ad0f",
     asset: "./assets/characters/hot-sizz.png",
+    idleAsset: "./assets/characters/idle/hot-sizz.webp",
+    idleAnimation: "./assets/animations/idle/hot-sizz.webm",
     moves: ["sizzling-plate", "flame-burst", "heat-up", "grand-performance"]
   },
   {
@@ -516,25 +530,35 @@ export const CHARACTERS = Object.freeze([
     color: "#b01c42",
     accent: "#ffa12b",
     asset: "./assets/characters/teppa-spark.png",
+    idleAsset: "./assets/characters/idle/teppa-spark.webp",
+    idleAnimation: "./assets/animations/idle/teppa-spark.webm",
     moves: ["precision-skewer", "spark-plate", "focus-flambe", "final-showpiece"],
     assumed: true
   }
 ]);
 
+const IDLE_BACKGROUNDS = Object.freeze({
+  curryGoblin: "./assets/backgrounds/curry-goblin.webp",
+  rootCurryBrute: "./assets/backgrounds/root-curry-brute.webp",
+  sporebackBrute: "./assets/backgrounds/sporeback-brute.webp",
+  rottenGoblin: "./assets/backgrounds/rotten-goblin.webp",
+  blazeFiend: "./assets/backgrounds/blaze-fiend.webp"
+});
+
 export const LEVELS = Object.freeze({
   solo: [
-    { name: "Curry Goblin", maxHp: 500, atk: 70, color: "#657d2f", accent: "#f5ad0f", asset: "./assets/enemies/curry-goblin.webp", moves: ["sauce-swipe", "curry-splash"] },
-    { name: "Root Curry Brute", maxHp: 700, atk: 78, color: "#a9601d", accent: "#8cad2d", asset: "./assets/enemies/root-curry-brute.webp", moves: ["root-bash", "gravy-snare"] },
-    { name: "Sporeback Brute", maxHp: 900, atk: 86, color: "#557329", accent: "#c7b274", asset: "./assets/enemies/sporeback-brute.webp", moves: ["spore-punch", "mushroom-haze", "fungal-guard"] },
-    { name: "Rotten Goblin", maxHp: 1180, atk: 90, color: "#718147", accent: "#b9b68b", asset: "./assets/enemies/rotten-goblin.webp", moves: ["filthy-swipe", "noxious-stench", "sludge-guard"] },
-    { name: "Blaze Fiend", maxHp: 1580, atk: 94, color: "#e84c0f", accent: "#ffd44d", asset: "./assets/enemies/blaze-fiend.webp", moves: ["flame-claw", "ember-crush", "wildfire-roar"] }
+    { name: "Curry Goblin", maxHp: 500, atk: 70, color: "#657d2f", accent: "#f5ad0f", asset: "./assets/enemies/curry-goblin.webp", idleBackground: IDLE_BACKGROUNDS.curryGoblin, moves: ["sauce-swipe", "curry-splash"] },
+    { name: "Root Curry Brute", maxHp: 700, atk: 78, color: "#a9601d", accent: "#8cad2d", asset: "./assets/enemies/root-curry-brute.webp", idleBackground: IDLE_BACKGROUNDS.rootCurryBrute, moves: ["root-bash", "gravy-snare"] },
+    { name: "Sporeback Brute", maxHp: 900, atk: 86, color: "#557329", accent: "#c7b274", asset: "./assets/enemies/sporeback-brute.webp", idleBackground: IDLE_BACKGROUNDS.sporebackBrute, moves: ["spore-punch", "mushroom-haze", "fungal-guard"] },
+    { name: "Rotten Goblin", maxHp: 1180, atk: 90, color: "#718147", accent: "#b9b68b", asset: "./assets/enemies/rotten-goblin.webp", idleBackground: IDLE_BACKGROUNDS.rottenGoblin, moves: ["filthy-swipe", "noxious-stench", "sludge-guard"] },
+    { name: "Blaze Fiend", maxHp: 1580, atk: 94, color: "#e84c0f", accent: "#ffd44d", asset: "./assets/enemies/blaze-fiend.webp", idleBackground: IDLE_BACKGROUNDS.blazeFiend, moves: ["flame-claw", "ember-crush", "wildfire-roar"] }
   ],
   multiplayer: [
-    { name: "Curry Goblin", maxHp: 1400, atk: 82, color: "#657d2f", accent: "#f5ad0f", asset: "./assets/enemies/curry-goblin.webp", moves: ["sauce-swipe", "curry-splash", "curry-cloud"] },
-    { name: "Root Curry Brute", maxHp: 1780, atk: 92, color: "#a9601d", accent: "#8cad2d", asset: "./assets/enemies/root-curry-brute.webp", moves: ["root-bash", "gravy-snare", "root-guard"] },
-    { name: "Sporeback Brute", maxHp: 2180, atk: 102, color: "#557329", accent: "#c7b274", asset: "./assets/enemies/sporeback-brute.webp", moves: ["spore-punch", "mushroom-haze", "fungal-guard"] },
-    { name: "Rotten Goblin", maxHp: 2420, atk: 107, color: "#718147", accent: "#b9b68b", asset: "./assets/enemies/rotten-goblin.webp", moves: ["filthy-swipe", "noxious-stench", "sludge-guard"] },
-    { name: "Blaze Fiend", maxHp: 2650, atk: 112, color: "#e84c0f", accent: "#ffd44d", asset: "./assets/enemies/blaze-fiend.webp", moves: ["flame-claw", "ember-crush", "wildfire-roar"] }
+    { name: "Curry Goblin", maxHp: 1400, atk: 82, color: "#657d2f", accent: "#f5ad0f", asset: "./assets/enemies/curry-goblin.webp", idleBackground: IDLE_BACKGROUNDS.curryGoblin, moves: ["sauce-swipe", "curry-splash", "curry-cloud"] },
+    { name: "Root Curry Brute", maxHp: 1780, atk: 92, color: "#a9601d", accent: "#8cad2d", asset: "./assets/enemies/root-curry-brute.webp", idleBackground: IDLE_BACKGROUNDS.rootCurryBrute, moves: ["root-bash", "gravy-snare", "root-guard"] },
+    { name: "Sporeback Brute", maxHp: 2180, atk: 102, color: "#557329", accent: "#c7b274", asset: "./assets/enemies/sporeback-brute.webp", idleBackground: IDLE_BACKGROUNDS.sporebackBrute, moves: ["spore-punch", "mushroom-haze", "fungal-guard"] },
+    { name: "Rotten Goblin", maxHp: 2420, atk: 107, color: "#718147", accent: "#b9b68b", asset: "./assets/enemies/rotten-goblin.webp", idleBackground: IDLE_BACKGROUNDS.rottenGoblin, moves: ["filthy-swipe", "noxious-stench", "sludge-guard"] },
+    { name: "Blaze Fiend", maxHp: 2650, atk: 112, color: "#e84c0f", accent: "#ffd44d", asset: "./assets/enemies/blaze-fiend.webp", idleBackground: IDLE_BACKGROUNDS.blazeFiend, moves: ["flame-claw", "ember-crush", "wildfire-roar"] }
   ]
 });
 

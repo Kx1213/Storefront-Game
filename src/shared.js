@@ -1,4 +1,4 @@
-import { CHARACTERS, getCharacter, getLevel } from "./game-data.js?v=20260722-animation-perf2";
+import { CHARACTERS, getCharacter, getLevel } from "./game-data.js?v=20260724-idle-perf2";
 
 export function sanitizeGameId(value) {
   if (!value) {

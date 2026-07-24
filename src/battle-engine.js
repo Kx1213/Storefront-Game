@@ -1,5 +1,5 @@
-import { getLevelCount, getMove } from "./game-data.js?v=20260722-animation-perf2";
-import { appendLog, buildMonster, clamp, createEmptyEffects, getAlivePlayerIds, getOrderedPlayers } from "./shared.js?v=20260722-animation-perf2";
+import { getLevelCount, getMove } from "./game-data.js?v=20260724-idle-perf2";
+import { appendLog, buildMonster, clamp, createEmptyEffects, getAlivePlayerIds, getOrderedPlayers } from "./shared.js?v=20260724-idle-perf2";
 
 function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
