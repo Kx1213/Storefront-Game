@@ -1,6 +1,6 @@
 import { get, onValue, ref, serverTimestamp, set, update } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 import { db } from "./firebase.js";
-import { getLevelCount, getMove, getMoves } from "./game-data.js?v=20260724-idle-perf2";
+import { getLevelCount, getMove, getMoves } from "./game-data.js?v=20260731-easy-delay";
 import {
   buildMonster,
   buildPlayer,
@@ -13,7 +13,7 @@ import {
   hpPercent,
   listCharacters,
   sanitizeGameId
-} from "./shared.js?v=20260724-idle-perf2";
+} from "./shared.js?v=20260731-easy-delay";
 
 const $ = (id) => document.getElementById(id);
 const panels = {

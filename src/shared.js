@@ -1,4 +1,4 @@
-import { CHARACTERS, getCharacter, getLevel } from "./game-data.js?v=20260724-idle-perf2";
+import { CHARACTERS, getCharacter, getLevel } from "./game-data.js?v=20260731-easy-delay";
 
 export function sanitizeGameId(value) {
   if (!value) {

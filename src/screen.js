@@ -1,5 +1,5 @@
-import { allAlivePlayersHaveMoves, prepareNextLevel, resolveRound } from "./battle-engine.js?v=20260724-idle-perf2";
-import { CHARACTERS, LEVELS, getLevelCount, getMove } from "./game-data.js?v=20260724-idle-perf2";
+import { allAlivePlayersHaveMoves, prepareNextLevel, resolveRound } from "./battle-engine.js?v=20260731-easy-delay";
+import { CHARACTERS, LEVELS, getLevelCount, getMove } from "./game-data.js?v=20260731-easy-delay";
 import {
   createAttractSession,
   formatGameCode,
@@ -8,7 +8,7 @@ import {
   getLobbyEntries,
   getOrderedPlayers,
   hpPercent
-} from "./shared.js?v=20260724-idle-perf2";
+} from "./shared.js?v=20260731-easy-delay";
 
 let get;
 let onValue;
@@ -27,6 +27,8 @@ const MOVE_ANIMATION_FALLBACK_TIMEOUT_MS = 1600;
 const MOVE_ANIMATION_VERSION = "20260722-animation-perf2";
 const IDLE_ANIMATION_VERSION = "20260724-idle-perf2";
 const IDLE_BACKGROUND_VERSION = "20260724-idle-perf2";
+const PLAYER_ART_VERSION = "20260803-player-art-perf1";
+const PLAYER_LOOK_UP_DELAY_MS = 1800;
 const LIVE_MOVE_ANIMATION_SPACING_MS = 940;
 const WEBSITE_URL = "https://reito-bt.github.io/Monster-Curry-Personality-Prototype-Website/";
 const IDLE_IMPACT_WORDS = ["BAM!", "SIZZLE!", "CRUNCH!", "POW!", "SLASH!", "BOOM!"];
@@ -108,6 +110,8 @@ const warmingMoveAnimations = new Set();
 const queuedMoveAnimations = new Set();
 const moveAnimationWarmQueue = [];
 const idleBackgroundPreloads = new Map();
+const playerArtPreloads = new Map();
+const playerCardElements = new Map();
 const idleElementAnimationStates = new WeakMap();
 const moveAnimationPlaybackStates = new WeakMap();
 let moveAnimationWarmQueueRunning = false;
@@ -311,6 +315,67 @@ function preloadIdleBackground(backgroundPath) {
   }
 
   return idleBackgroundPreloads.get(sourceUrl);
+}
+
+function getPlayerArtPath(player) {
+  const character = CHARACTERS.find((entry) => entry.id === player?.characterId);
+  return character?.idleAsset || character?.asset || player?.asset || null;
+}
+
+function getPlayerArtUrl(player) {
+  const assetPath = getPlayerArtPath(player);
+  if (!assetPath) {
+    return null;
+  }
+
+  const url = new URL(assetPath, window.location.href);
+  url.searchParams.set("v", PLAYER_ART_VERSION);
+  return url.href;
+}
+
+function preloadPlayerArt(player) {
+  const sourceUrl = getPlayerArtUrl(player);
+  if (!sourceUrl) {
+    return Promise.resolve(null);
+  }
+
+  if (!playerArtPreloads.has(sourceUrl)) {
+    const preload = new Promise((resolve) => {
+      const image = new Image();
+      image.decoding = "async";
+      image.fetchPriority = "high";
+      image.addEventListener("load", () => {
+        const decode = typeof image.decode === "function" ? image.decode() : Promise.resolve();
+        decode.catch(() => {}).finally(() => resolve(sourceUrl));
+      }, { once: true });
+      image.addEventListener("error", () => {
+        playerArtPreloads.delete(sourceUrl);
+        resolve(null);
+      }, { once: true });
+      image.src = sourceUrl;
+    });
+    playerArtPreloads.set(sourceUrl, preload);
+  }
+
+  return playerArtPreloads.get(sourceUrl);
+}
+
+function warmSelectedCharacterArt(state) {
+  const characterIds = new Set([
+    ...getLobbyEntries(state)
+      .filter((entry) => entry.confirmed && entry.characterId)
+      .map((entry) => entry.characterId),
+    ...getOrderedPlayers(state)
+      .map((player) => player.characterId)
+      .filter(Boolean)
+  ]);
+
+  characterIds.forEach((characterId) => {
+    const character = CHARACTERS.find((entry) => entry.id === characterId);
+    if (character) {
+      void preloadPlayerArt({ characterId, asset: character.asset });
+    }
+  });
 }
 
 function updateIdleBattleBackground(backgroundPath) {
@@ -778,7 +843,7 @@ function animateResolvingMoves(state) {
       if (move.power || move.hits) {
         animateIdleElement(elements.monsterCard, "is-live-hit", 580);
       }
-    }, 120 + index * LIVE_MOVE_ANIMATION_SPACING_MS);
+    }, PLAYER_LOOK_UP_DELAY_MS + index * LIVE_MOVE_ANIMATION_SPACING_MS);
   });
 }
 
@@ -1020,30 +1085,79 @@ function renderLobby(state) {
   });
 }
 
-function playerCard(player, pendingMoves) {
-  const move = pendingMoves?.[player.id] ? getMove(pendingMoves[player.id].moveId) : null;
+function createPlayerCard(player) {
   const card = document.createElement("article");
-  card.className = `combat-card player-card ${player.hp <= 0 ? "down is-defeated" : ""}`;
+  card.className = "combat-card player-card";
   card.dataset.playerId = player.id;
-  card.style.setProperty("--fighter-color", player.color || "#ed1d24");
-  card.style.setProperty("--fighter-accent", player.accent || "#f5ad0f");
   card.innerHTML = `
     <div class="combat-label">
-      <span>Player ${Number(player.slot || 0) + 1}</span>
-      <strong>${player.name}</strong>
+      <span></span>
+      <strong></strong>
     </div>
     <div class="hp-row">
       <span>HP</span>
       <div class="hp-track">
-        <div class="hp-fill" style="width:${hpPercent(player)}%"></div>
-        <strong class="hp-value">${player.hp}/${player.maxHp}</strong>
+        <div class="hp-fill"></div>
+        <strong class="hp-value"></strong>
       </div>
     </div>
-    <img class="combat-art" src="${player.asset}" alt="${player.name}" decoding="async">
-    <div class="effect-line">${effectText(player)}</div>
-    <div class="locked-move">${player.hp <= 0 ? "Down" : move ? `Locked: ${move.name}` : "Choosing move"}</div>
+    <img class="combat-art" alt="" width="512" height="512" decoding="async" loading="eager" fetchpriority="high">
+    <div class="effect-line"></div>
+    <div class="locked-move"></div>
   `;
   return card;
+}
+
+function updatePlayerCard(card, player, pendingMoves) {
+  const move = pendingMoves?.[player.id] ? getMove(pendingMoves[player.id].moveId) : null;
+  const sourceUrl = getPlayerArtUrl(player);
+  const art = card.querySelector(".combat-art");
+
+  card.classList.toggle("down", player.hp <= 0);
+  card.classList.toggle("is-defeated", player.hp <= 0);
+  card.style.setProperty("--fighter-color", player.color || "#ed1d24");
+  card.style.setProperty("--fighter-accent", player.accent || "#f5ad0f");
+  card.querySelector(".combat-label span").textContent = `Player ${Number(player.slot || 0) + 1}`;
+  card.querySelector(".combat-label strong").textContent = player.name;
+  card.querySelector(".hp-fill").style.width = `${hpPercent(player)}%`;
+  card.querySelector(".hp-value").textContent = `${player.hp}/${player.maxHp}`;
+  card.querySelector(".effect-line").textContent = effectText(player);
+  card.querySelector(".locked-move").textContent = player.hp <= 0
+    ? "Down"
+    : move
+      ? `Locked: ${move.name}`
+      : "Choosing move";
+
+  art.alt = player.name;
+  if (sourceUrl && art.dataset.sourceUrl !== sourceUrl) {
+    art.dataset.sourceUrl = sourceUrl;
+    art.src = sourceUrl;
+    void preloadPlayerArt(player);
+  }
+}
+
+function renderPlayerCards(players, pendingMoves) {
+  const activePlayerIds = new Set(players.map((player) => player.id));
+
+  playerCardElements.forEach((card, playerId) => {
+    if (!activePlayerIds.has(playerId)) {
+      card.remove();
+      playerCardElements.delete(playerId);
+    }
+  });
+
+  players.forEach((player, index) => {
+    let card = playerCardElements.get(player.id);
+    if (!card) {
+      card = createPlayerCard(player);
+      playerCardElements.set(player.id, card);
+    }
+
+    updatePlayerCard(card, player, pendingMoves);
+    if (elements.playerCards.children[index] !== card) {
+      elements.playerCards.insertBefore(card, elements.playerCards.children[index] || null);
+    }
+  });
 }
 
 function renderLog(log) {
@@ -1069,8 +1183,7 @@ function renderBattle(state) {
   elements.modeLabel.textContent = state.mode === "multiplayer" ? "Co-op Mode" : "Solo Mode";
   elements.levelLabel.textContent = `Level ${Number(state.levelIndex || 0) + 1} / ${totalLevels}`;
   elements.turnNumber.textContent = state.turn || 1;
-  elements.playerCards.innerHTML = "";
-  players.forEach((player) => elements.playerCards.append(playerCard(player, state.pendingMoves || {})));
+  renderPlayerCards(players, state.pendingMoves || {});
 
   if (monster) {
     elements.monsterCard.classList.toggle("is-defeated", monster.hp <= 0);
@@ -1117,6 +1230,7 @@ function renderGameOver(state) {
 }
 
 function render(state) {
+  warmSelectedCharacterArt(state);
   warmSelectedCharacterAnimations(state);
   updateGameCodeLabels(state);
 
@@ -1209,7 +1323,7 @@ async function resolvePendingMoves(state) {
     lastActionAt: serverTimestamp()
   });
 
-  const animationDelay = 1400
+  const animationDelay = PLAYER_LOOK_UP_DELAY_MS + 1400
     + Math.max(0, getAlivePlayerIds(state).length - 1) * LIVE_MOVE_ANIMATION_SPACING_MS;
 
   window.setTimeout(async () => {

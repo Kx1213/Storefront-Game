@@ -1,5 +1,5 @@
-import { getLevelCount, getMove } from "./game-data.js?v=20260724-idle-perf2";
-import { appendLog, buildMonster, clamp, createEmptyEffects, getAlivePlayerIds, getOrderedPlayers } from "./shared.js?v=20260724-idle-perf2";
+import { getLevelCount, getMove } from "./game-data.js?v=20260731-easy-delay";
+import { appendLog, buildMonster, clamp, createEmptyEffects, getAlivePlayerIds, getOrderedPlayers } from "./shared.js?v=20260731-easy-delay";
 
 function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -277,7 +277,7 @@ function chooseMonsterTarget(players) {
   }
 
   const weakest = lowestHpAlly(players);
-  return Math.random() < 0.62
+  return Math.random() < 0.35
     ? weakest
     : players.filter(isAlive)[randomInt(0, players.filter(isAlive).length - 1)];
 }
@@ -398,7 +398,7 @@ export function prepareNextLevel(state) {
   const nextLevelIndex = Number(state.levelIndex || 0) + 1;
   const players = getOrderedPlayers(state).map((player) => {
     const healed = cloneFighter(player);
-    healed.hp = clamp(healed.hp + Math.round(healed.maxHp * 0.25), 1, healed.maxHp);
+    healed.hp = clamp(healed.hp + Math.round(healed.maxHp * 0.65), 1, healed.maxHp);
     healed.shield = 0;
     healed.effects = createEmptyEffects();
     return healed;
