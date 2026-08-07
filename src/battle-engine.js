@@ -1,5 +1,5 @@
-import { getLevelCount, getMove } from "./game-data.js?v=20260731-easy-delay";
-import { appendLog, buildMonster, clamp, createEmptyEffects, getAlivePlayerIds, getOrderedPlayers } from "./shared.js?v=20260731-easy-delay";
+import { getLevelCount, getMove } from "./game-data.js?v=20260808-hard-enemies";
+import { appendLog, buildMonster, clamp, createEmptyEffects, getAlivePlayerIds, getOrderedPlayers } from "./shared.js?v=20260808-hard-enemies";
 
 function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -277,7 +277,7 @@ function chooseMonsterTarget(players) {
   }
 
   const weakest = lowestHpAlly(players);
-  return Math.random() < 0.35
+  return Math.random() < 0.62
     ? weakest
     : players.filter(isAlive)[randomInt(0, players.filter(isAlive).length - 1)];
 }

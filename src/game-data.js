@@ -547,18 +547,18 @@ const IDLE_BACKGROUNDS = Object.freeze({
 
 export const LEVELS = Object.freeze({
   solo: [
-    { name: "Curry Goblin", maxHp: 300, atk: 20, color: "#657d2f", accent: "#f5ad0f", asset: "./assets/enemies/curry-goblin.webp", idleBackground: IDLE_BACKGROUNDS.curryGoblin, moves: ["sauce-swipe", "curry-splash"] },
-    { name: "Root Curry Brute", maxHp: 400, atk: 22, color: "#a9601d", accent: "#8cad2d", asset: "./assets/enemies/root-curry-brute.webp", idleBackground: IDLE_BACKGROUNDS.rootCurryBrute, moves: ["root-bash", "gravy-snare"] },
-    { name: "Sporeback Brute", maxHp: 520, atk: 24, color: "#557329", accent: "#c7b274", asset: "./assets/enemies/sporeback-brute.webp", idleBackground: IDLE_BACKGROUNDS.sporebackBrute, moves: ["spore-punch", "mushroom-haze", "fungal-guard"] },
-    { name: "Rotten Goblin", maxHp: 650, atk: 26, color: "#718147", accent: "#b9b68b", asset: "./assets/enemies/rotten-goblin.webp", idleBackground: IDLE_BACKGROUNDS.rottenGoblin, moves: ["filthy-swipe", "noxious-stench", "sludge-guard"] },
-    { name: "Blaze Fiend", maxHp: 800, atk: 28, color: "#e84c0f", accent: "#ffd44d", asset: "./assets/enemies/blaze-fiend.webp", idleBackground: IDLE_BACKGROUNDS.blazeFiend, moves: ["flame-claw", "ember-crush", "wildfire-roar"] }
+    { name: "Curry Goblin", maxHp: 500, atk: 70, color: "#657d2f", accent: "#f5ad0f", asset: "./assets/enemies/curry-goblin.webp", idleBackground: IDLE_BACKGROUNDS.curryGoblin, moves: ["sauce-swipe", "curry-splash"] },
+    { name: "Root Curry Brute", maxHp: 700, atk: 78, color: "#a9601d", accent: "#8cad2d", asset: "./assets/enemies/root-curry-brute.webp", idleBackground: IDLE_BACKGROUNDS.rootCurryBrute, moves: ["root-bash", "gravy-snare"] },
+    { name: "Sporeback Brute", maxHp: 900, atk: 86, color: "#557329", accent: "#c7b274", asset: "./assets/enemies/sporeback-brute.webp", idleBackground: IDLE_BACKGROUNDS.sporebackBrute, moves: ["spore-punch", "mushroom-haze", "fungal-guard"] },
+    { name: "Rotten Goblin", maxHp: 1180, atk: 90, color: "#718147", accent: "#b9b68b", asset: "./assets/enemies/rotten-goblin.webp", idleBackground: IDLE_BACKGROUNDS.rottenGoblin, moves: ["filthy-swipe", "noxious-stench", "sludge-guard"] },
+    { name: "Blaze Fiend", maxHp: 1580, atk: 94, color: "#e84c0f", accent: "#ffd44d", asset: "./assets/enemies/blaze-fiend.webp", idleBackground: IDLE_BACKGROUNDS.blazeFiend, moves: ["flame-claw", "ember-crush", "wildfire-roar"] }
   ],
   multiplayer: [
-    { name: "Curry Goblin", maxHp: 800, atk: 26, color: "#657d2f", accent: "#f5ad0f", asset: "./assets/enemies/curry-goblin.webp", idleBackground: IDLE_BACKGROUNDS.curryGoblin, moves: ["sauce-swipe", "curry-splash", "curry-cloud"] },
-    { name: "Root Curry Brute", maxHp: 1050, atk: 28, color: "#a9601d", accent: "#8cad2d", asset: "./assets/enemies/root-curry-brute.webp", idleBackground: IDLE_BACKGROUNDS.rootCurryBrute, moves: ["root-bash", "gravy-snare", "root-guard"] },
-    { name: "Sporeback Brute", maxHp: 1300, atk: 30, color: "#557329", accent: "#c7b274", asset: "./assets/enemies/sporeback-brute.webp", idleBackground: IDLE_BACKGROUNDS.sporebackBrute, moves: ["spore-punch", "mushroom-haze", "fungal-guard"] },
-    { name: "Rotten Goblin", maxHp: 1550, atk: 32, color: "#718147", accent: "#b9b68b", asset: "./assets/enemies/rotten-goblin.webp", idleBackground: IDLE_BACKGROUNDS.rottenGoblin, moves: ["filthy-swipe", "noxious-stench", "sludge-guard"] },
-    { name: "Blaze Fiend", maxHp: 1800, atk: 34, color: "#e84c0f", accent: "#ffd44d", asset: "./assets/enemies/blaze-fiend.webp", idleBackground: IDLE_BACKGROUNDS.blazeFiend, moves: ["flame-claw", "ember-crush", "wildfire-roar"] }
+    { name: "Curry Goblin", maxHp: 1400, atk: 82, color: "#657d2f", accent: "#f5ad0f", asset: "./assets/enemies/curry-goblin.webp", idleBackground: IDLE_BACKGROUNDS.curryGoblin, moves: ["sauce-swipe", "curry-splash", "curry-cloud"] },
+    { name: "Root Curry Brute", maxHp: 1780, atk: 92, color: "#a9601d", accent: "#8cad2d", asset: "./assets/enemies/root-curry-brute.webp", idleBackground: IDLE_BACKGROUNDS.rootCurryBrute, moves: ["root-bash", "gravy-snare", "root-guard"] },
+    { name: "Sporeback Brute", maxHp: 2180, atk: 102, color: "#557329", accent: "#c7b274", asset: "./assets/enemies/sporeback-brute.webp", idleBackground: IDLE_BACKGROUNDS.sporebackBrute, moves: ["spore-punch", "mushroom-haze", "fungal-guard"] },
+    { name: "Rotten Goblin", maxHp: 2420, atk: 107, color: "#718147", accent: "#b9b68b", asset: "./assets/enemies/rotten-goblin.webp", idleBackground: IDLE_BACKGROUNDS.rottenGoblin, moves: ["filthy-swipe", "noxious-stench", "sludge-guard"] },
+    { name: "Blaze Fiend", maxHp: 2650, atk: 112, color: "#e84c0f", accent: "#ffd44d", asset: "./assets/enemies/blaze-fiend.webp", idleBackground: IDLE_BACKGROUNDS.blazeFiend, moves: ["flame-claw", "ember-crush", "wildfire-roar"] }
   ]
 });
 

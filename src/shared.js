@@ -1,4 +1,4 @@
-import { CHARACTERS, getCharacter, getLevel } from "./game-data.js?v=20260731-easy-delay";
+import { CHARACTERS, getCharacter, getLevel } from "./game-data.js?v=20260808-hard-enemies";
 
 export function sanitizeGameId(value) {
   if (!value) {

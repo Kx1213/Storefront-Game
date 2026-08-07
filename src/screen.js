@@ -1,5 +1,5 @@
-import { allAlivePlayersHaveMoves, prepareNextLevel, resolveRound } from "./battle-engine.js?v=20260731-easy-delay";
-import { CHARACTERS, LEVELS, getLevelCount, getMove } from "./game-data.js?v=20260731-easy-delay";
+import { allAlivePlayersHaveMoves, prepareNextLevel, resolveRound } from "./battle-engine.js?v=20260808-hard-enemies";
+import { CHARACTERS, LEVELS, getLevelCount, getMove } from "./game-data.js?v=20260808-hard-enemies";
 import {
   createAttractSession,
   formatGameCode,
@@ -8,7 +8,7 @@ import {
   getLobbyEntries,
   getOrderedPlayers,
   hpPercent
-} from "./shared.js?v=20260731-easy-delay";
+} from "./shared.js?v=20260808-hard-enemies";
 
 let get;
 let onValue;
