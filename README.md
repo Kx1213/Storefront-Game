@@ -2,10 +2,10 @@
 
 Static HTML/CSS/JavaScript storefront battle prototype. The big screen shows a tall portrait battle display, and phones join from the Monster Curry website by entering the game code shown on the screen.
 
-## What Changed From The Settings PDF
+## Web Game Features
 
-- Replaced the old roster with the 8 Monster Curry characters from `Storefront Game Settings.pdf`.
-- Added the PNG character art from `D:\Capstone\Curry Personas` under `assets/characters`.
+- Uses the eight approved Monster Curry characters.
+- Stores the optimized web character art under `assets/characters`.
 - Added a lobby for up to 2 players.
 - First player sees "Waiting for other players to join" and can press `Start Single Player`.
 - If a second player enters the code before the solo battle starts, the game switches to co-op automatically.
@@ -58,11 +58,17 @@ Firebase config is in `src/firebase.js`. Realtime Database state is stored at:
 sessions/{gameId}
 ```
 
-For prototype testing, `database.rules.json` is open. For a real deployment, add Firebase Auth, App Check, and server-side battle resolution with Cloud Functions.
+Publish the Realtime Database rules separately from the website:
+
+```bash
+firebase deploy --only database --project storefront-game
+```
+
+A GitHub push updates the web files but does not deploy Firebase rules. For prototype testing, `database.rules.json` allows public access only below `sessions`. For a production deployment, add Firebase Auth, App Check, and server-side battle resolution with Cloud Functions.
 
 ## Assumption
 
-The PDF shows Teppa Spark's title and artwork, but no stats or moves. I added a balanced placeholder kit:
+The source settings provide Teppa Spark's title and artwork, but no stats or moves. The web game uses this balanced placeholder kit:
 
 - HP 1000
 - ATK 100
