@@ -896,6 +896,13 @@ button:disabled {
   bottom: 22px;
   width: 158px;
   padding: 8px;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.mini-code:hover,
+.mini-code:focus-within {
+  opacity: 1;
 }
 
 .mini-code span {
@@ -944,7 +951,7 @@ button:disabled {
   z-index: 20;
   display: flex;
   gap: 8px;
-  opacity: 0.14;
+  opacity: 0;
   transition: opacity 160ms ease;
 }
 
