@@ -12,7 +12,7 @@ Static HTML/CSS/JavaScript storefront battle prototype. The big screen shows a t
 - Added 5 solo levels and 5 harder co-op levels.
 - Replaced the generic monster art with five enemy designs: Curry Goblin, Root Curry Brute, Sporeback Brute, Rotten Goblin, and Blaze Fiend.
 - Added enemy-specific move sets for all five encounters, culminating in Blaze Fiend.
-- Added on-demand move animations for all eight playable characters. The kiosk defaults to hardware-friendly H.264 clips, with transparent WebM available as a fallback.
+- Added on-demand transparent move animations for all eight playable characters. Live kiosk clips are optimized to 480 × 480 at 24 fps and retain their alpha channel, while the original full-resolution sources remain available.
 - Battle is cooperative: 1 or 2 players fight the monster, reduce monster HP to 0, and advance through levels.
 - The big screen uses a fixed 577×1439 design canvas and scales it uniformly, so every display with the same ratio has the same composition.
 - The screen creates a random four-digit game code and replaces it after each completed game.
@@ -50,7 +50,7 @@ The unattended attract screen cycles through all five monsters. Each simulated f
 
 The idle preview also rotates through the playable characters and demonstrates one signature move per character. It uses dedicated 512 × 512 WebP character art plus 320 × 320 transparent clips, and plays each clip only on the first player attack of a simulated fight; later attacks use lightweight CSS motion. On lower-powered kiosks, the preview automatically stays with lightweight CSS motion. Only the current short clip is warmed, avoiding a full animation-library download at startup.
 
-During a live move, the background briefly holds its current frame so the kiosk decodes only the foreground move clip. Append `?animationQuality=transparent` to the screen URL only when a higher-powered kiosk should prefer the transparent WebM versions instead of the smoother H.264 defaults.
+During a live move, the background briefly holds its current frame so the kiosk decodes only the transparent foreground clip. Co-op moves remain serialized to prevent two alpha videos decoding together. If the kiosk drops too many video frames, live clips switch off for that browser session and the lightweight CSS attack effects continue without showing an opaque background. Append `?animationQuality=high` to use the original 640 × 640 transparent clips on a higher-powered kiosk, or `?animationQuality=static` to use CSS-only attacks on hardware without smooth VP9 playback.
 
 ## Firebase
 

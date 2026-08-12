@@ -561,13 +561,9 @@ button:disabled {
   width: 108%;
   max-width: 620px;
   object-fit: contain;
-  mix-blend-mode: screen;
+  mix-blend-mode: normal;
   filter: none;
   contain: layout paint;
-}
-
-.move-animation.has-transparent-source {
-  mix-blend-mode: normal;
 }
 
 .move-animation.is-playing {

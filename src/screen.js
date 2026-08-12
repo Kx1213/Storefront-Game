@@ -24,8 +24,12 @@ const DESIGN_HEIGHT = 1439;
 const SCREEN_GAME_STORAGE_KEY = "storefront-screen-game";
 const MOVE_ANIMATION_FALLBACK_TIMEOUT_MS = 1600;
 const MOVE_ANIMATION_PLAYBACK_WATCHDOG_MS = 2200;
+const MOVE_ANIMATION_QUALITY_SAMPLE_MS = 550;
+const MOVE_ANIMATION_QUALITY_MIN_FRAMES = 8;
+const MOVE_ANIMATION_QUALITY_MAX_DROPPED_FRAMES = 3;
+const MOVE_ANIMATION_QUALITY_MAX_DROPPED_RATIO = 0.18;
 const BATTLE_BACKGROUND_RESUME_DELAY_MS = 180;
-const MOVE_ANIMATION_VERSION = "20260722-animation-perf2";
+const MOVE_ANIMATION_VERSION = "20260812-alpha-kiosk1";
 const IDLE_ANIMATION_VERSION = "20260724-idle-perf2";
 const IDLE_BACKGROUND_VERSION = "20260724-idle-perf2";
 const PLAYER_ART_VERSION = "20260803-player-art-perf1";
@@ -116,13 +120,16 @@ const idleElementAnimationStates = new WeakMap();
 const moveAnimationPlaybackStates = new WeakMap();
 const activeLiveMoveVideos = new Set();
 let moveAnimationWarmQueueRunning = false;
+let liveMoveVideosDisabled = false;
+let liveMoveTransparencyVerified = false;
 const transparentMoveAnimationsSupported = Boolean(
   elements.moveAnimation?.canPlayType('video/webm; codecs="vp9"')
 );
 const animationQuality = new URLSearchParams(window.location.search).get("animationQuality");
 const preferTransparentBattleAnimations = Boolean(
-  transparentMoveAnimationsSupported && animationQuality === "transparent"
+  transparentMoveAnimationsSupported && animationQuality !== "static"
 );
+const useHighQualityBattleAnimations = animationQuality === "high";
 const constrainedAnimationDevice = Boolean(
   (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4)
   || (navigator.deviceMemory && navigator.deviceMemory <= 4)
@@ -130,6 +137,7 @@ const constrainedAnimationDevice = Boolean(
 const networkInformation = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
 const idleVideoAnimationsEnabled = Boolean(
   transparentMoveAnimationsSupported
+  && animationQuality !== "static"
   && !constrainedAnimationDevice
   && !networkInformation?.saveData
   && !["slow-2g", "2g"].includes(networkInformation?.effectiveType)
@@ -559,6 +567,7 @@ function getMoveAnimationPlaybackState(video) {
   if (!moveAnimationPlaybackStates.has(video)) {
     moveAnimationPlaybackStates.set(video, {
       fallbackTimer: null,
+      qualityTimer: null,
       watchdogTimer: null,
       requestId: 0
     });
@@ -574,8 +583,10 @@ function clearMoveAnimationPlayback(video) {
 
   const playback = getMoveAnimationPlaybackState(video);
   window.clearTimeout(playback.fallbackTimer);
+  window.clearTimeout(playback.qualityTimer);
   window.clearTimeout(playback.watchdogTimer);
   playback.fallbackTimer = null;
+  playback.qualityTimer = null;
   playback.watchdogTimer = null;
   playback.requestId += 1;
   video.pause();
@@ -601,6 +612,94 @@ function setMoveAnimationPlaying(video, playing) {
   video.classList.toggle("is-playing", playing);
   if (video === elements.idleMoveAnimation) {
     elements.idlePlayerFighter.classList.toggle("is-playing-animation", playing);
+  }
+}
+
+function disableLiveMoveVideosForSession() {
+  if (liveMoveVideosDisabled) {
+    return;
+  }
+
+  liveMoveVideosDisabled = true;
+  moveAnimationWarmQueue.length = 0;
+  queuedMoveAnimations.clear();
+  elements.moveAnimations.forEach(clearMoveAnimationPlayback);
+}
+
+function monitorLiveMovePlaybackQuality(video, playback, requestId, startQuality) {
+  if (!startQuality || typeof video.getVideoPlaybackQuality !== "function") {
+    return;
+  }
+
+  window.clearTimeout(playback.qualityTimer);
+  playback.qualityTimer = window.setTimeout(() => {
+    playback.qualityTimer = null;
+    if (
+      requestId !== playback.requestId
+      || !video.classList.contains("is-playing")
+      || liveMoveVideosDisabled
+    ) {
+      return;
+    }
+
+    const endQuality = video.getVideoPlaybackQuality();
+    const totalFrames = Math.max(0, endQuality.totalVideoFrames - startQuality.totalVideoFrames);
+    const droppedFrames = Math.max(0, endQuality.droppedVideoFrames - startQuality.droppedVideoFrames);
+    const droppedRatio = totalFrames > 0 ? droppedFrames / totalFrames : 0;
+    if (
+      totalFrames >= MOVE_ANIMATION_QUALITY_MIN_FRAMES
+      && droppedFrames >= MOVE_ANIMATION_QUALITY_MAX_DROPPED_FRAMES
+      && droppedRatio >= MOVE_ANIMATION_QUALITY_MAX_DROPPED_RATIO
+    ) {
+      disableLiveMoveVideosForSession();
+    }
+  }, MOVE_ANIMATION_QUALITY_SAMPLE_MS);
+}
+
+function verifyLiveMoveTransparency(video) {
+  if (liveMoveTransparencyVerified) {
+    return true;
+  }
+
+  if (!video.videoWidth || !video.videoHeight) {
+    return false;
+  }
+
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = 4;
+    canvas.height = 1;
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    if (!context) {
+      return false;
+    }
+
+    const sampleSize = Math.max(1, Math.min(12, video.videoWidth, video.videoHeight));
+    const edgeSamples = [
+      [0, 0],
+      [video.videoWidth - sampleSize, 0],
+      [0, video.videoHeight - sampleSize],
+      [video.videoWidth - sampleSize, video.videoHeight - sampleSize]
+    ];
+    edgeSamples.forEach(([sourceX, sourceY], targetX) => {
+      context.drawImage(
+        video,
+        sourceX,
+        sourceY,
+        sampleSize,
+        sampleSize,
+        targetX,
+        0,
+        1,
+        1
+      );
+    });
+
+    const pixels = context.getImageData(0, 0, 4, 1).data;
+    liveMoveTransparencyVerified = edgeSamples.some((_, index) => pixels[index * 4 + 3] < 250);
+    return liveMoveTransparencyVerified;
+  } catch {
+    return false;
   }
 }
 
@@ -634,8 +733,12 @@ function moveAnimationUrl(move, transparent = preferTransparentBattleAnimations)
     return null;
   }
 
+  const isIdleAnimation = move.animation.includes("/animations/idle/");
+  const transparentExtension = isIdleAnimation || useHighQualityBattleAnimations
+    ? ".webm"
+    : ".kiosk.webm";
   const animationPath = transparent
-    ? move.animation.replace(/\.mp4$/i, ".webm")
+    ? move.animation.replace(/\.mp4$/i, transparentExtension)
     : move.animation;
   const url = new URL(animationPath, window.location.href);
   url.searchParams.set(
@@ -679,7 +782,7 @@ async function fetchMoveAnimationSource(sourceUrl, urgent = false) {
     await consumeResponseBody(response);
     warmedMoveAnimations.add(sourceUrl);
   } catch {
-    // Playback still retries the preferred source and its MP4 fallback on demand.
+    // The prepared video element still retries the transparent source on demand.
   } finally {
     warmingMoveAnimations.delete(sourceUrl);
   }
@@ -739,7 +842,12 @@ function warmMoveAnimation(
 }
 
 function warmSelectedCharacterAnimations(state) {
-  if (state?.status === "attract" || constrainedAnimationDevice) {
+  if (
+    state?.status === "attract"
+    || constrainedAnimationDevice
+    || !preferTransparentBattleAnimations
+    || liveMoveVideosDisabled
+  ) {
     return;
   }
 
@@ -766,15 +874,20 @@ function prepareMoveAnimation(
   video = elements.moveAnimation,
   preferTransparency = preferTransparentBattleAnimations
 ) {
-  if (!video || !move?.animation || video.classList.contains("is-playing")) {
+  if (
+    !video
+    || !move?.animation
+    || !preferTransparency
+    || !transparentMoveAnimationsSupported
+    || (elements.moveAnimations.includes(video) && liveMoveVideosDisabled)
+    || video.classList.contains("is-playing")
+  ) {
     return;
   }
 
-  const usesTransparency = Boolean(preferTransparency && transparentMoveAnimationsSupported);
-  const sourceUrl = moveAnimationUrl(move, usesTransparency);
-  const alternateUrl = transparentMoveAnimationsSupported
-    ? moveAnimationUrl(move, !usesTransparency)
-    : null;
+  const usesTransparency = true;
+  const sourceUrl = moveAnimationUrl(move, true);
+  const alternateUrl = null;
   if (!sourceUrl || (
     video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA
     && [sourceUrl, alternateUrl].includes(video.src)
@@ -784,8 +897,10 @@ function prepareMoveAnimation(
 
   const playback = getMoveAnimationPlaybackState(video);
   window.clearTimeout(playback.fallbackTimer);
+  window.clearTimeout(playback.qualityTimer);
   window.clearTimeout(playback.watchdogTimer);
   playback.fallbackTimer = null;
+  playback.qualityTimer = null;
   playback.watchdogTimer = null;
   playback.requestId += 1;
   video.pause();
@@ -802,6 +917,16 @@ function prepareMoveAnimation(
     video.classList.toggle("has-transparent-source", nextUsesTransparency);
     video.onerror = fallbackUrl && nextUrl !== fallbackUrl
       ? () => loadPreparedSource(fallbackUrl, !usesTransparency)
+      : elements.moveAnimations.includes(video)
+        ? () => disableLiveMoveVideosForSession()
+        : null;
+    video.oncanplay = elements.moveAnimations.includes(video)
+      ? () => {
+        video.oncanplay = null;
+        if (!verifyLiveMoveTransparency(video)) {
+          disableLiveMoveVideosForSession();
+        }
+      }
       : null;
     video.src = nextUrl;
     video.load();
@@ -814,25 +939,27 @@ function playMoveAnimation(
   video = elements.moveAnimation,
   preferTransparency = preferTransparentBattleAnimations
 ) {
-  if (!video || !move?.animation) {
+  if (
+    !video
+    || !move?.animation
+    || !preferTransparency
+    || !transparentMoveAnimationsSupported
+    || (elements.moveAnimations.includes(video) && liveMoveVideosDisabled)
+  ) {
     return;
   }
 
   const playback = getMoveAnimationPlaybackState(video);
   window.clearTimeout(playback.fallbackTimer);
+  window.clearTimeout(playback.qualityTimer);
   window.clearTimeout(playback.watchdogTimer);
   playback.fallbackTimer = null;
+  playback.qualityTimer = null;
   playback.watchdogTimer = null;
   const requestId = ++playback.requestId;
   const transparentUrl = moveAnimationUrl(move, true);
-  const fallbackUrl = moveAnimationUrl(move, false);
-  const useTransparentSource = Boolean(preferTransparency && transparentMoveAnimationsSupported);
-  const preferredUrl = useTransparentSource ? transparentUrl : fallbackUrl;
-  const secondaryUrl = useTransparentSource
-    ? fallbackUrl
-    : transparentMoveAnimationsSupported
-      ? transparentUrl
-      : null;
+  const preferredUrl = transparentUrl;
+  const secondaryUrl = null;
   const preparedUrl = video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA
     && [preferredUrl, secondaryUrl].includes(video.src)
     ? video.src
@@ -841,13 +968,18 @@ function playMoveAnimation(
   const retryUrl = preparedUrl === preferredUrl ? secondaryUrl : preferredUrl;
   const hasRetrySource = Boolean(retryUrl && retryUrl !== preparedUrl);
 
-  const finishPlayback = () => {
+  const finishPlayback = (disableLiveVideos = false) => {
+    window.clearTimeout(playback.qualityTimer);
     window.clearTimeout(playback.watchdogTimer);
+    playback.qualityTimer = null;
     playback.watchdogTimer = null;
     setMoveAnimationPlaying(video, false);
     if (elements.moveAnimations.includes(video)) {
       activeLiveMoveVideos.delete(video);
       resumeBattleBackgroundAfterMove();
+      if (disableLiveVideos) {
+        disableLiveMoveVideosForSession();
+      }
     }
   };
 
@@ -857,12 +989,18 @@ function playMoveAnimation(
     }
 
     window.clearTimeout(playback.fallbackTimer);
+    window.clearTimeout(playback.qualityTimer);
     window.clearTimeout(playback.watchdogTimer);
     playback.fallbackTimer = null;
+    playback.qualityTimer = null;
     playback.watchdogTimer = null;
     video.oncanplay = null;
-    video.onerror = finishPlayback;
+    video.onerror = () => finishPlayback(true);
     video.pause();
+    if (elements.moveAnimations.includes(video) && !verifyLiveMoveTransparency(video)) {
+      finishPlayback(true);
+      return;
+    }
     video.currentTime = 0;
     setMoveAnimationPlaying(video, false);
     video.classList.toggle("has-transparent-source", usesTransparency);
@@ -871,7 +1009,20 @@ function playMoveAnimation(
       activeLiveMoveVideos.add(video);
       suspendBattleBackgroundForMove();
     }
+    const startQuality = elements.moveAnimations.includes(video)
+      ? video.getVideoPlaybackQuality?.()
+      : null;
     video.play()
+      .then(() => {
+        if (
+          requestId === playback.requestId
+          && video.classList.contains("is-playing")
+          && elements.moveAnimations.includes(video)
+          && !liveMoveVideosDisabled
+        ) {
+          monitorLiveMovePlaybackQuality(video, playback, requestId, startQuality);
+        }
+      })
       .catch(() => {
         if (requestId !== playback.requestId) {
           return;
@@ -884,10 +1035,13 @@ function playMoveAnimation(
         if (retryUrl) {
           loadSource(retryUrl, retryUsesTransparency);
         } else {
-          finishPlayback();
+          finishPlayback(true);
         }
       });
-    playback.watchdogTimer = window.setTimeout(finishPlayback, MOVE_ANIMATION_PLAYBACK_WATCHDOG_MS);
+    playback.watchdogTimer = window.setTimeout(
+      () => finishPlayback(true),
+      MOVE_ANIMATION_PLAYBACK_WATCHDOG_MS
+    );
   };
 
   const loadSource = (sourceUrl, usesTransparency, retryUrl = null, retryUsesTransparency = false) => {
@@ -896,8 +1050,10 @@ function playMoveAnimation(
     }
 
     window.clearTimeout(playback.fallbackTimer);
+    window.clearTimeout(playback.qualityTimer);
     window.clearTimeout(playback.watchdogTimer);
     playback.fallbackTimer = null;
+    playback.qualityTimer = null;
     playback.watchdogTimer = null;
     video.pause();
     setMoveAnimationPlaying(video, false);
@@ -914,7 +1070,7 @@ function playMoveAnimation(
       if (retryUrl) {
         loadSource(retryUrl, retryUsesTransparency);
       } else {
-        finishPlayback();
+        finishPlayback(true);
       }
     };
 
@@ -1533,7 +1689,9 @@ async function boot() {
     video?.addEventListener("ended", () => {
       setMoveAnimationPlaying(video, false);
       const playback = getMoveAnimationPlaybackState(video);
+      window.clearTimeout(playback.qualityTimer);
       window.clearTimeout(playback.watchdogTimer);
+      playback.qualityTimer = null;
       playback.watchdogTimer = null;
       video.currentTime = 0;
       if (elements.moveAnimations.includes(video)) {
