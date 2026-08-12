@@ -22,8 +22,9 @@ let db;
 const DESIGN_WIDTH = 577;
 const DESIGN_HEIGHT = 1439;
 const SCREEN_GAME_STORAGE_KEY = "storefront-screen-game";
-const BATTLE_BACKGROUND_HANDOFF_LEAD_SECONDS = 0.16;
 const MOVE_ANIMATION_FALLBACK_TIMEOUT_MS = 1600;
+const MOVE_ANIMATION_PLAYBACK_WATCHDOG_MS = 2200;
+const BATTLE_BACKGROUND_RESUME_DELAY_MS = 180;
 const MOVE_ANIMATION_VERSION = "20260722-animation-perf2";
 const IDLE_ANIMATION_VERSION = "20260724-idle-perf2";
 const IDLE_BACKGROUND_VERSION = "20260724-idle-perf2";
@@ -52,7 +53,8 @@ const elements = {
   liveBattleMove: $("liveBattleMove"),
   liveBattleImpact: $("liveBattleImpact"),
   moveAnimation: $("moveAnimation"),
-  battleBackgroundVideos: [$("battleBackgroundVideoA"), $("battleBackgroundVideoB")],
+  moveAnimations: [$("moveAnimation"), $("moveAnimationSecondary")],
+  battleBackgroundVideo: $("battleBackgroundVideo"),
   gameCodeLabel: $("gameCodeLabel"),
   lobbyCode: $("lobbyCode"),
   lobbyJoinCode: $("lobbyJoinCode"),
@@ -90,10 +92,8 @@ let sessionRef = null;
 let unsubscribe = null;
 let rotatingSession = false;
 let battleBackgroundRunning = false;
-let activeBattleBackgroundIndex = 0;
-let battleBackgroundHandoffInProgress = false;
-let battleBackgroundMonitor = null;
-let battleBackgroundPreload = null;
+let battleBackgroundSuspendedForMove = false;
+let battleBackgroundResumeTimer = null;
 let idleBattleTimer = null;
 let idleBattleState = null;
 let idleCharacterCursor = 0;
@@ -114,13 +114,23 @@ const playerArtPreloads = new Map();
 const playerCardElements = new Map();
 const idleElementAnimationStates = new WeakMap();
 const moveAnimationPlaybackStates = new WeakMap();
+const activeLiveMoveVideos = new Set();
 let moveAnimationWarmQueueRunning = false;
 const transparentMoveAnimationsSupported = Boolean(
   elements.moveAnimation?.canPlayType('video/webm; codecs="vp9"')
 );
+const animationQuality = new URLSearchParams(window.location.search).get("animationQuality");
+const preferTransparentBattleAnimations = Boolean(
+  transparentMoveAnimationsSupported && animationQuality === "transparent"
+);
+const constrainedAnimationDevice = Boolean(
+  (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4)
+  || (navigator.deviceMemory && navigator.deviceMemory <= 4)
+);
 const networkInformation = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
 const idleVideoAnimationsEnabled = Boolean(
   transparentMoveAnimationsSupported
+  && !constrainedAnimationDevice
   && !networkInformation?.saveData
   && !["slow-2g", "2g"].includes(networkInformation?.effectiveType)
   && !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
@@ -549,6 +559,7 @@ function getMoveAnimationPlaybackState(video) {
   if (!moveAnimationPlaybackStates.has(video)) {
     moveAnimationPlaybackStates.set(video, {
       fallbackTimer: null,
+      watchdogTimer: null,
       requestId: 0
     });
   }
@@ -563,15 +574,33 @@ function clearMoveAnimationPlayback(video) {
 
   const playback = getMoveAnimationPlaybackState(video);
   window.clearTimeout(playback.fallbackTimer);
+  window.clearTimeout(playback.watchdogTimer);
   playback.fallbackTimer = null;
+  playback.watchdogTimer = null;
   playback.requestId += 1;
   video.pause();
   video.oncanplay = null;
   video.onerror = null;
-  video.classList.remove("is-playing", "has-transparent-source");
+  setMoveAnimationPlaying(video, false);
+  video.classList.remove("has-transparent-source");
   if (video.getAttribute("src")) {
     video.removeAttribute("src");
     video.load();
+  }
+  if (elements.moveAnimations.includes(video)) {
+    activeLiveMoveVideos.delete(video);
+    resumeBattleBackgroundAfterMove();
+  }
+}
+
+function setMoveAnimationPlaying(video, playing) {
+  if (!video) {
+    return;
+  }
+
+  video.classList.toggle("is-playing", playing);
+  if (video === elements.idleMoveAnimation) {
+    elements.idlePlayerFighter.classList.toggle("is-playing-animation", playing);
   }
 }
 
@@ -582,7 +611,8 @@ function clearLiveBattleAnimations() {
   lastBattleSnapshot = null;
   elements.liveBattleMove.classList.remove("is-showing");
   elements.liveBattleImpact.classList.remove("is-bursting");
-  clearMoveAnimationPlayback(elements.moveAnimation);
+  elements.moveAnimations.forEach(clearMoveAnimationPlayback);
+  activeLiveMoveVideos.clear();
 }
 
 function getPlayerBattleCard(playerId) {
@@ -599,7 +629,7 @@ function showLiveBattleAction(moveName, impact = null) {
   }
 }
 
-function moveAnimationUrl(move, transparent = transparentMoveAnimationsSupported) {
+function moveAnimationUrl(move, transparent = preferTransparentBattleAnimations) {
   if (!move?.animation) {
     return null;
   }
@@ -617,6 +647,21 @@ function moveAnimationUrl(move, transparent = transparentMoveAnimationsSupported
   return url.href;
 }
 
+async function consumeResponseBody(response) {
+  const reader = response.body?.getReader?.();
+  if (!reader) {
+    await response.blob();
+    return;
+  }
+
+  while (true) {
+    const { done } = await reader.read();
+    if (done) {
+      return;
+    }
+  }
+}
+
 async function fetchMoveAnimationSource(sourceUrl, urgent = false) {
   if (!sourceUrl || warmedMoveAnimations.has(sourceUrl) || warmingMoveAnimations.has(sourceUrl)) {
     return;
@@ -631,7 +676,7 @@ async function fetchMoveAnimationSource(sourceUrl, urgent = false) {
     if (!response.ok) {
       throw new Error(`Could not preload move animation (${response.status})`);
     }
-    await response.arrayBuffer();
+    await consumeResponseBody(response);
     warmedMoveAnimations.add(sourceUrl);
   } catch {
     // Playback still retries the preferred source and its MP4 fallback on demand.
@@ -664,7 +709,7 @@ function warmMoveAnimation(
   move,
   {
     urgent = false,
-    transparent = transparentMoveAnimationsSupported
+    transparent = preferTransparentBattleAnimations
   } = {}
 ) {
   const sourceUrl = moveAnimationUrl(move, transparent);
@@ -694,6 +739,10 @@ function warmMoveAnimation(
 }
 
 function warmSelectedCharacterAnimations(state) {
+  if (state?.status === "attract" || constrainedAnimationDevice) {
+    return;
+  }
+
   const characterIds = new Set([
     ...getLobbyEntries(state)
       .filter((entry) => entry.confirmed && entry.characterId)
@@ -712,10 +761,58 @@ function warmSelectedCharacterAnimations(state) {
   });
 }
 
+function prepareMoveAnimation(
+  move,
+  video = elements.moveAnimation,
+  preferTransparency = preferTransparentBattleAnimations
+) {
+  if (!video || !move?.animation || video.classList.contains("is-playing")) {
+    return;
+  }
+
+  const usesTransparency = Boolean(preferTransparency && transparentMoveAnimationsSupported);
+  const sourceUrl = moveAnimationUrl(move, usesTransparency);
+  const alternateUrl = transparentMoveAnimationsSupported
+    ? moveAnimationUrl(move, !usesTransparency)
+    : null;
+  if (!sourceUrl || (
+    video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA
+    && [sourceUrl, alternateUrl].includes(video.src)
+  )) {
+    return;
+  }
+
+  const playback = getMoveAnimationPlaybackState(video);
+  window.clearTimeout(playback.fallbackTimer);
+  window.clearTimeout(playback.watchdogTimer);
+  playback.fallbackTimer = null;
+  playback.watchdogTimer = null;
+  playback.requestId += 1;
+  video.pause();
+  video.oncanplay = null;
+  video.onerror = null;
+  setMoveAnimationPlaying(video, false);
+  video.classList.toggle("has-transparent-source", usesTransparency);
+  video.preload = "auto";
+  const fallbackUrl = alternateUrl;
+  const loadPreparedSource = (nextUrl, nextUsesTransparency) => {
+    if (!nextUrl) {
+      return;
+    }
+    video.classList.toggle("has-transparent-source", nextUsesTransparency);
+    video.onerror = fallbackUrl && nextUrl !== fallbackUrl
+      ? () => loadPreparedSource(fallbackUrl, !usesTransparency)
+      : null;
+    video.src = nextUrl;
+    video.load();
+  };
+  loadPreparedSource(sourceUrl, usesTransparency);
+}
+
 function playMoveAnimation(
   move,
   video = elements.moveAnimation,
-  preferTransparency = transparentMoveAnimationsSupported
+  preferTransparency = preferTransparentBattleAnimations
 ) {
   if (!video || !move?.animation) {
     return;
@@ -723,86 +820,129 @@ function playMoveAnimation(
 
   const playback = getMoveAnimationPlaybackState(video);
   window.clearTimeout(playback.fallbackTimer);
+  window.clearTimeout(playback.watchdogTimer);
   playback.fallbackTimer = null;
+  playback.watchdogTimer = null;
   const requestId = ++playback.requestId;
   const transparentUrl = moveAnimationUrl(move, true);
   const fallbackUrl = moveAnimationUrl(move, false);
   const useTransparentSource = Boolean(preferTransparency && transparentMoveAnimationsSupported);
+  const preferredUrl = useTransparentSource ? transparentUrl : fallbackUrl;
+  const secondaryUrl = useTransparentSource
+    ? fallbackUrl
+    : transparentMoveAnimationsSupported
+      ? transparentUrl
+      : null;
+  const preparedUrl = video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA
+    && [preferredUrl, secondaryUrl].includes(video.src)
+    ? video.src
+    : preferredUrl;
+  const preparedUsesTransparency = preparedUrl === transparentUrl;
+  const retryUrl = preparedUrl === preferredUrl ? secondaryUrl : preferredUrl;
+  const hasRetrySource = Boolean(retryUrl && retryUrl !== preparedUrl);
 
-  const startPlayback = (sourceUrl, usesTransparency) => {
+  const finishPlayback = () => {
+    window.clearTimeout(playback.watchdogTimer);
+    playback.watchdogTimer = null;
+    setMoveAnimationPlaying(video, false);
+    if (elements.moveAnimations.includes(video)) {
+      activeLiveMoveVideos.delete(video);
+      resumeBattleBackgroundAfterMove();
+    }
+  };
+
+  const startPlayback = (sourceUrl, usesTransparency, retryUrl = null, retryUsesTransparency = false) => {
     if (requestId !== playback.requestId || video.src !== sourceUrl) {
       return;
     }
 
     window.clearTimeout(playback.fallbackTimer);
+    window.clearTimeout(playback.watchdogTimer);
     playback.fallbackTimer = null;
+    playback.watchdogTimer = null;
     video.oncanplay = null;
-    video.onerror = null;
+    video.onerror = finishPlayback;
     video.pause();
     video.currentTime = 0;
-    video.classList.remove("is-playing");
+    setMoveAnimationPlaying(video, false);
     video.classList.toggle("has-transparent-source", usesTransparency);
-    video.classList.add("is-playing");
+    setMoveAnimationPlaying(video, true);
+    if (elements.moveAnimations.includes(video)) {
+      activeLiveMoveVideos.add(video);
+      suspendBattleBackgroundForMove();
+    }
     video.play()
       .catch(() => {
         if (requestId !== playback.requestId) {
           return;
         }
 
-        if (usesTransparency) {
-          loadSource(fallbackUrl, false);
+        if (elements.moveAnimations.includes(video)) {
+          activeLiveMoveVideos.delete(video);
+          resumeBattleBackgroundAfterMove();
+        }
+        if (retryUrl) {
+          loadSource(retryUrl, retryUsesTransparency);
         } else {
-          video.classList.remove("is-playing");
+          finishPlayback();
         }
       });
+    playback.watchdogTimer = window.setTimeout(finishPlayback, MOVE_ANIMATION_PLAYBACK_WATCHDOG_MS);
   };
 
-  const loadSource = (sourceUrl, usesTransparency) => {
+  const loadSource = (sourceUrl, usesTransparency, retryUrl = null, retryUsesTransparency = false) => {
     if (!sourceUrl || requestId !== playback.requestId) {
       return;
     }
 
     window.clearTimeout(playback.fallbackTimer);
+    window.clearTimeout(playback.watchdogTimer);
     playback.fallbackTimer = null;
+    playback.watchdogTimer = null;
     video.pause();
-    video.classList.remove("is-playing");
+    setMoveAnimationPlaying(video, false);
     video.classList.toggle("has-transparent-source", usesTransparency);
-    video.oncanplay = () => startPlayback(sourceUrl, usesTransparency);
+    video.oncanplay = () => startPlayback(sourceUrl, usesTransparency, retryUrl, retryUsesTransparency);
     video.onerror = () => {
       if (requestId !== playback.requestId) {
         return;
       }
 
-      if (usesTransparency) {
-        loadSource(fallbackUrl, false);
+      if (elements.moveAnimations.includes(video)) {
+        resumeBattleBackgroundAfterMove();
+      }
+      if (retryUrl) {
+        loadSource(retryUrl, retryUsesTransparency);
       } else {
-        video.classList.remove("is-playing");
+        finishPlayback();
       }
     };
 
     if (video.src !== sourceUrl) {
       video.src = sourceUrl;
+      video.load();
     }
 
-    if (video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
-      startPlayback(sourceUrl, usesTransparency);
+    if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+      startPlayback(sourceUrl, usesTransparency, retryUrl, retryUsesTransparency);
       return;
     }
 
-    video.load();
-    if (usesTransparency && fallbackUrl && fallbackUrl !== sourceUrl) {
+    if (retryUrl) {
       playback.fallbackTimer = window.setTimeout(() => {
         playback.fallbackTimer = null;
         if (requestId === playback.requestId && !video.classList.contains("is-playing")) {
-          loadSource(fallbackUrl, false);
+          loadSource(retryUrl, retryUsesTransparency);
         }
       }, MOVE_ANIMATION_FALLBACK_TIMEOUT_MS);
     }
   };
 
   loadSource(
-    useTransparentSource ? transparentUrl : fallbackUrl,
-    useTransparentSource
+    preparedUrl,
+    preparedUsesTransparency,
+    hasRetrySource ? retryUrl : null,
+    retryUrl === transparentUrl
   );
 }
 
@@ -838,12 +978,12 @@ function animateResolvingMoves(state) {
 
       const playerCard = getPlayerBattleCard(player.id);
       showLiveBattleAction(move.name, randomItem(IDLE_IMPACT_WORDS));
-      playMoveAnimation(move);
+      playMoveAnimation(move, elements.moveAnimations[index % elements.moveAnimations.length]);
       animateIdleElement(playerCard, "is-live-attacking", 680);
       if (move.power || move.hits) {
         animateIdleElement(elements.monsterCard, "is-live-hit", 580);
       }
-    }, PLAYER_LOOK_UP_DELAY_MS + index * LIVE_MOVE_ANIMATION_SPACING_MS);
+    }, PLAYER_LOOK_UP_DELAY_MS + index * (LIVE_MOVE_ANIMATION_SPACING_MS + MOVE_ANIMATION_FALLBACK_TIMEOUT_MS));
   });
 }
 
@@ -887,117 +1027,57 @@ function animateRoundOutcome(state, previousSnapshot) {
   }
 }
 
-function cancelBattleBackgroundCallback(callback) {
-  if (!callback) {
+function suspendBattleBackgroundForMove() {
+  window.clearTimeout(battleBackgroundResumeTimer);
+  battleBackgroundResumeTimer = null;
+  if (!battleBackgroundRunning || battleBackgroundSuspendedForMove) {
     return;
   }
 
-  if (callback.cancel) {
-    callback.cancel();
-  } else if (typeof callback.video.cancelVideoFrameCallback === "function") {
-    callback.video.cancelVideoFrameCallback(callback.id);
-  }
+  battleBackgroundSuspendedForMove = true;
+  elements.battleView.classList.add("is-move-playing");
+  elements.battleBackgroundVideo.pause();
 }
 
-function monitorBattleBackground(videoIndex) {
-  const video = elements.battleBackgroundVideos[videoIndex];
-  if (!battleBackgroundRunning || videoIndex !== activeBattleBackgroundIndex || typeof video.requestVideoFrameCallback !== "function") {
+function resumeBattleBackgroundAfterMove() {
+  if (activeLiveMoveVideos.size > 0) {
+    window.clearTimeout(battleBackgroundResumeTimer);
+    battleBackgroundResumeTimer = null;
     return;
   }
 
-  const callback = {
-    video,
-    id: video.requestVideoFrameCallback(() => {
-      if (battleBackgroundMonitor === callback) {
-        battleBackgroundMonitor = null;
-      }
+  if (!battleBackgroundSuspendedForMove) {
+    elements.battleView.classList.remove("is-move-playing");
+    return;
+  }
 
-      if (!battleBackgroundRunning || videoIndex !== activeBattleBackgroundIndex) {
-        return;
-      }
+  window.clearTimeout(battleBackgroundResumeTimer);
+  battleBackgroundResumeTimer = window.setTimeout(() => {
+    battleBackgroundResumeTimer = null;
+    if (activeLiveMoveVideos.size > 0) {
+      return;
+    }
+    battleBackgroundSuspendedForMove = false;
+    elements.battleView.classList.remove("is-move-playing");
+    if (!battleBackgroundRunning || document.hidden || elements.battleView.hidden) {
+      return;
+    }
 
-      const secondsRemaining = video.duration - video.currentTime;
-      if (Number.isFinite(secondsRemaining) && secondsRemaining <= BATTLE_BACKGROUND_HANDOFF_LEAD_SECONDS) {
-        handOffBattleBackground(videoIndex);
-        return;
-      }
-
-      monitorBattleBackground(videoIndex);
-    })
-  };
-  battleBackgroundMonitor = callback;
+    elements.battleBackgroundVideo.play().catch(() => {
+      // Foreground animation remains usable if background playback cannot resume.
+    });
+  }, BATTLE_BACKGROUND_RESUME_DELAY_MS);
 }
 
 function stopBattleBackground() {
   battleBackgroundRunning = false;
-  battleBackgroundHandoffInProgress = false;
-  cancelBattleBackgroundCallback(battleBackgroundMonitor);
-  cancelBattleBackgroundCallback(battleBackgroundPreload);
-  battleBackgroundMonitor = null;
-  battleBackgroundPreload = null;
-
-  elements.battleBackgroundVideos.forEach((video, index) => {
-    video.pause();
-    video.currentTime = 0;
-    video.classList.toggle("is-active", index === 0);
-  });
-  activeBattleBackgroundIndex = 0;
-}
-
-function handOffBattleBackground(endedIndex) {
-  if (!battleBackgroundRunning || endedIndex !== activeBattleBackgroundIndex || battleBackgroundHandoffInProgress) {
-    return;
-  }
-
-  battleBackgroundHandoffInProgress = true;
-  const currentVideo = elements.battleBackgroundVideos[endedIndex];
-  const nextIndex = activeBattleBackgroundIndex === 0 ? 1 : 0;
-  const nextVideo = elements.battleBackgroundVideos[nextIndex];
-  nextVideo.currentTime = 0;
-
-  const revealNextVideo = () => {
-    battleBackgroundPreload = null;
-    if (!battleBackgroundRunning || endedIndex !== activeBattleBackgroundIndex) {
-      nextVideo.pause();
-      nextVideo.currentTime = 0;
-      battleBackgroundHandoffInProgress = false;
-      return;
-    }
-
-    nextVideo.classList.add("is-active");
-    currentVideo.classList.remove("is-active");
-    activeBattleBackgroundIndex = nextIndex;
-    currentVideo.pause();
-    currentVideo.currentTime = 0;
-    battleBackgroundHandoffInProgress = false;
-    monitorBattleBackground(nextIndex);
-  };
-
-  if (typeof nextVideo.requestVideoFrameCallback === "function") {
-    const callback = {
-      video: nextVideo,
-      id: nextVideo.requestVideoFrameCallback(revealNextVideo)
-    };
-    battleBackgroundPreload = callback;
-  } else {
-    const onPlaying = () => revealNextVideo();
-    nextVideo.addEventListener("playing", onPlaying, { once: true });
-    battleBackgroundPreload = {
-      video: nextVideo,
-      cancel: () => nextVideo.removeEventListener("playing", onPlaying)
-    };
-  }
-
-  nextVideo.play().catch(() => {
-    cancelBattleBackgroundCallback(battleBackgroundPreload);
-    battleBackgroundPreload = null;
-    battleBackgroundHandoffInProgress = false;
-
-    if (battleBackgroundRunning && endedIndex === activeBattleBackgroundIndex) {
-      currentVideo.currentTime = 0;
-      currentVideo.play().then(() => monitorBattleBackground(endedIndex)).catch(() => {});
-    }
-  });
+  battleBackgroundSuspendedForMove = false;
+  activeLiveMoveVideos.clear();
+  window.clearTimeout(battleBackgroundResumeTimer);
+  battleBackgroundResumeTimer = null;
+  elements.battleView.classList.remove("is-move-playing");
+  elements.battleBackgroundVideo.pause();
+  elements.battleBackgroundVideo.currentTime = 0;
 }
 
 function startBattleBackground() {
@@ -1006,10 +1086,7 @@ function startBattleBackground() {
   }
 
   battleBackgroundRunning = true;
-  const currentVideo = elements.battleBackgroundVideos[activeBattleBackgroundIndex];
-  currentVideo.play().then(() => {
-    monitorBattleBackground(activeBattleBackgroundIndex);
-  }).catch(() => {
+  elements.battleBackgroundVideo.play().catch(() => {
     // The game stays usable if a browser blocks muted autoplay.
   });
 }
@@ -1208,10 +1285,15 @@ function renderBattle(state) {
       : `Now pick your move on your phone! ${readyCount}/${aliveIds.length} ready`;
   }
 
-  const chosenMoves = Object.values(state.pendingMoves || {})
-    .map((entry) => getMove(entry.moveId))
+  const chosenMoves = players
+    .map((player) => state.pendingMoves?.[player.id])
+    .map((entry) => getMove(entry?.moveId))
     .filter(Boolean);
-  chosenMoves.forEach((move) => warmMoveAnimation(move, { urgent: true }));
+  if (state.status === "battle") {
+    chosenMoves.forEach((move, index) => {
+      prepareMoveAnimation(move, elements.moveAnimations[index % elements.moveAnimations.length]);
+    });
+  }
   elements.lastMoves.textContent = chosenMoves.length ? `Locked moves: ${chosenMoves.map((move) => move.name).join(" + ")}` : "";
   renderLog(state.log);
   animateResolvingMoves(state);
@@ -1324,7 +1406,8 @@ async function resolvePendingMoves(state) {
   });
 
   const animationDelay = PLAYER_LOOK_UP_DELAY_MS + 1400
-    + Math.max(0, getAlivePlayerIds(state).length - 1) * LIVE_MOVE_ANIMATION_SPACING_MS;
+    + Math.max(0, getAlivePlayerIds(state).length - 1)
+      * (LIVE_MOVE_ANIMATION_SPACING_MS + MOVE_ANIMATION_FALLBACK_TIMEOUT_MS);
 
   window.setTimeout(async () => {
     if (gameId !== activeGameId) {
@@ -1446,13 +1529,17 @@ async function boot() {
       startBattleBackground();
     }
   });
-  elements.battleBackgroundVideos.forEach((video, index) => {
-    video.addEventListener("ended", () => handOffBattleBackground(index));
-  });
-  [elements.moveAnimation, elements.idleMoveAnimation].forEach((video) => {
+  [...elements.moveAnimations, elements.idleMoveAnimation].forEach((video) => {
     video?.addEventListener("ended", () => {
-      video.classList.remove("is-playing");
+      setMoveAnimationPlaying(video, false);
+      const playback = getMoveAnimationPlaybackState(video);
+      window.clearTimeout(playback.watchdogTimer);
+      playback.watchdogTimer = null;
       video.currentTime = 0;
+      if (elements.moveAnimations.includes(video)) {
+        activeLiveMoveVideos.delete(video);
+        resumeBattleBackgroundAfterMove();
+      }
     });
   });
   bindControls();

@@ -6,9 +6,9 @@
     <title>Monster Curry Storefront Battle</title>
     <link rel="icon" href="data:,">
     <link rel="preload" href="./assets/backgrounds/curry-goblin.webp?v=20260724-idle-perf2" as="image" type="image/webp" fetchpriority="high">
-    <link rel="stylesheet" href="./styles.css?v=20260724-idle-perf2">
+    <link rel="stylesheet" href="./styles.css?v=20260812-kiosk-perf2">
     <script async src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-    <script type="module" src="./src/screen.js?v=20260808-hard-enemies"></script>
+    <script type="module" src="./src/screen.js?v=20260812-kiosk-perf2"></script>
   </head>
   <body class="screen-page">
     <main class="screen-app">
@@ -87,15 +87,13 @@
       </section>
 
       <section id="battleView" class="display-view battle-view" hidden>
-        <video id="battleBackgroundVideoA" class="battle-background-video is-active" muted playsinline preload="none" aria-hidden="true">
-          <source src="./assets/battle-background.mp4?v=20260722-perf1" type="video/mp4">
-        </video>
-        <video id="battleBackgroundVideoB" class="battle-background-video" muted playsinline preload="none" aria-hidden="true">
+        <video id="battleBackgroundVideo" class="battle-background-video is-active" muted playsinline loop preload="metadata" aria-hidden="true">
           <source src="./assets/battle-background.mp4?v=20260722-perf1" type="video/mp4">
         </video>
         <div class="battle-background-scrim" aria-hidden="true"></div>
         <div class="live-battle-fx" aria-live="polite" aria-atomic="true">
           <video id="moveAnimation" class="attack-animation move-animation" muted playsinline preload="none" aria-hidden="true"></video>
+          <video id="moveAnimationSecondary" class="attack-animation move-animation" muted playsinline preload="none" aria-hidden="true"></video>
           <strong id="liveBattleMove" class="live-battle-move"></strong>
           <span id="liveBattleImpact" class="live-battle-impact" aria-hidden="true">BAM!</span>
         </div>

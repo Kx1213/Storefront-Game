@@ -12,7 +12,7 @@ Static HTML/CSS/JavaScript storefront battle prototype. The big screen shows a t
 - Added 5 solo levels and 5 harder co-op levels.
 - Replaced the generic monster art with five enemy designs: Curry Goblin, Root Curry Brute, Sporeback Brute, Rotten Goblin, and Blaze Fiend.
 - Added enemy-specific move sets for all five encounters, culminating in Blaze Fiend.
-- Added on-demand transparent WebM move animations with optimized MP4 fallbacks for all eight playable characters, without preloading the full animation library.
+- Added on-demand move animations for all eight playable characters. The kiosk defaults to hardware-friendly H.264 clips, with transparent WebM available as a fallback.
 - Battle is cooperative: 1 or 2 players fight the monster, reduce monster HP to 0, and advance through levels.
 - The big screen uses a fixed 577×1439 design canvas and scales it uniformly, so every display with the same ratio has the same composition.
 - The screen creates a random four-digit game code and replaces it after each completed game.
@@ -48,7 +48,9 @@ Serve that website separately, tap the floating `Battle` button, and enter the s
 
 The unattended attract screen cycles through all five monsters. Each simulated fight uses the matching lightweight WebP environment from `assets/backgrounds`, while one upcoming scene is preloaded to keep the transition quick. The active QR-controlled game retains the original optimized `assets/battle-background.mp4` presentation.
 
-The idle preview also rotates through the playable characters and demonstrates one signature move per character. It uses dedicated 512 × 512 WebP character art plus 320 × 320 transparent clips, and plays each clip only on the first player attack of a simulated fight; later attacks use lightweight CSS motion. Only the current short clip is warmed, avoiding a full animation-library download at startup.
+The idle preview also rotates through the playable characters and demonstrates one signature move per character. It uses dedicated 512 × 512 WebP character art plus 320 × 320 transparent clips, and plays each clip only on the first player attack of a simulated fight; later attacks use lightweight CSS motion. On lower-powered kiosks, the preview automatically stays with lightweight CSS motion. Only the current short clip is warmed, avoiding a full animation-library download at startup.
+
+During a live move, the background briefly holds its current frame so the kiosk decodes only the foreground move clip. Append `?animationQuality=transparent` to the screen URL only when a higher-powered kiosk should prefer the transparent WebM versions instead of the smoother H.264 defaults.
 
 ## Firebase
 
