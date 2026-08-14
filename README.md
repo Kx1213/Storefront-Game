@@ -15,7 +15,7 @@ Static HTML/CSS/JavaScript storefront battle prototype. The big screen shows a t
 - Added on-demand transparent move animations for all eight playable characters. Live kiosk clips are optimized to 480 × 480 at 24 fps and retain their alpha channel, while the original full-resolution sources remain available.
 - Battle is cooperative: 1 or 2 players fight the monster, reduce monster HP to 0, and advance through levels.
 - The big screen uses a fixed 577×1439 design canvas and scales it uniformly, so every display with the same ratio has the same composition.
-- The screen creates a random four-digit game code and replaces it after each completed game.
+- The screen creates a random four-digit game code and replaces it eight seconds after each completed game.
 - The phone UI follows the red Monster Curry header and character/move flow shown in the PDF.
 
 ## Run Locally

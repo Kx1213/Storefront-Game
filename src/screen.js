@@ -26,6 +26,8 @@ const MOVE_ANIMATION_FALLBACK_TIMEOUT_MS = 1600;
 const MOVE_ANIMATION_READY_TIMEOUT_MS = 10000;
 const MOVE_ANIMATION_PLAYBACK_WATCHDOG_MS = 2200;
 const BATTLE_BACKGROUND_RESUME_DELAY_MS = 180;
+const GAME_OVER_REVEAL_DELAY_MS = 1650;
+const GAME_OVER_RESET_DELAY_MS = 8000;
 const MOVE_ANIMATION_VERSION = "20260812-alpha-kiosk1";
 const IDLE_ANIMATION_VERSION = "20260724-idle-perf2";
 const IDLE_BACKGROUND_VERSION = "20260724-idle-perf2";
@@ -1573,7 +1575,7 @@ function render(state) {
         gameOverRevealTimer = window.setTimeout(() => {
           gameOverRevealTimer = null;
           renderGameOver(state);
-        }, 1650);
+        }, GAME_OVER_REVEAL_DELAY_MS);
       }
       return;
     }
@@ -1592,6 +1594,7 @@ async function rotateToNewSession() {
 
   rotatingSession = true;
   window.clearTimeout(gameOverTimer);
+  gameOverTimer = null;
   window.clearTimeout(gameOverRevealTimer);
   gameOverRevealTimer = null;
   clearLiveBattleAnimations();
@@ -1731,13 +1734,20 @@ function scheduleLevelAdvance(state) {
 }
 
 function scheduleGameOverReset(state) {
-  window.clearTimeout(gameOverTimer);
-
-  if (state?.status === "game-over") {
-    gameOverTimer = window.setTimeout(() => {
-      rotateToNewSession().catch((error) => console.error("Could not rotate game code", error));
-    }, 24000);
+  if (state?.status !== "game-over") {
+    window.clearTimeout(gameOverTimer);
+    gameOverTimer = null;
+    return;
   }
+
+  if (gameOverTimer) {
+    return;
+  }
+
+  gameOverTimer = window.setTimeout(() => {
+    gameOverTimer = null;
+    rotateToNewSession().catch((error) => console.error("Could not rotate game code", error));
+  }, GAME_OVER_RESET_DELAY_MS);
 }
 
 function bindControls() {
