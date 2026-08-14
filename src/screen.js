@@ -23,11 +23,8 @@ const DESIGN_WIDTH = 577;
 const DESIGN_HEIGHT = 1439;
 const SCREEN_GAME_STORAGE_KEY = "storefront-screen-game";
 const MOVE_ANIMATION_FALLBACK_TIMEOUT_MS = 1600;
+const MOVE_ANIMATION_READY_TIMEOUT_MS = 10000;
 const MOVE_ANIMATION_PLAYBACK_WATCHDOG_MS = 2200;
-const MOVE_ANIMATION_QUALITY_SAMPLE_MS = 550;
-const MOVE_ANIMATION_QUALITY_MIN_FRAMES = 8;
-const MOVE_ANIMATION_QUALITY_MAX_DROPPED_FRAMES = 3;
-const MOVE_ANIMATION_QUALITY_MAX_DROPPED_RATIO = 0.18;
 const BATTLE_BACKGROUND_RESUME_DELAY_MS = 180;
 const MOVE_ANIMATION_VERSION = "20260812-alpha-kiosk1";
 const IDLE_ANIMATION_VERSION = "20260724-idle-perf2";
@@ -119,8 +116,9 @@ const playerCardElements = new Map();
 const idleElementAnimationStates = new WeakMap();
 const moveAnimationPlaybackStates = new WeakMap();
 const activeLiveMoveVideos = new Set();
+const moveAnimationReadinessByToken = new Map();
+const moveAnimationReadinessJobs = new Map();
 let moveAnimationWarmQueueRunning = false;
-let liveMoveVideosDisabled = false;
 let liveMoveTransparencyVerified = false;
 const transparentMoveAnimationsSupported = Boolean(
   elements.moveAnimation?.canPlayType('video/webm; codecs="vp9"')
@@ -567,7 +565,6 @@ function getMoveAnimationPlaybackState(video) {
   if (!moveAnimationPlaybackStates.has(video)) {
     moveAnimationPlaybackStates.set(video, {
       fallbackTimer: null,
-      qualityTimer: null,
       watchdogTimer: null,
       requestId: 0
     });
@@ -583,10 +580,8 @@ function clearMoveAnimationPlayback(video) {
 
   const playback = getMoveAnimationPlaybackState(video);
   window.clearTimeout(playback.fallbackTimer);
-  window.clearTimeout(playback.qualityTimer);
   window.clearTimeout(playback.watchdogTimer);
   playback.fallbackTimer = null;
-  playback.qualityTimer = null;
   playback.watchdogTimer = null;
   playback.requestId += 1;
   video.pause();
@@ -615,45 +610,12 @@ function setMoveAnimationPlaying(video, playing) {
   }
 }
 
-function disableLiveMoveVideosForSession() {
-  if (liveMoveVideosDisabled) {
-    return;
-  }
-
-  liveMoveVideosDisabled = true;
-  moveAnimationWarmQueue.length = 0;
-  queuedMoveAnimations.clear();
-  elements.moveAnimations.forEach(clearMoveAnimationPlayback);
+function cancelMoveAnimationReadiness(token) {
+  moveAnimationReadinessJobs.get(token)?.cancel();
 }
 
-function monitorLiveMovePlaybackQuality(video, playback, requestId, startQuality) {
-  if (!startQuality || typeof video.getVideoPlaybackQuality !== "function") {
-    return;
-  }
-
-  window.clearTimeout(playback.qualityTimer);
-  playback.qualityTimer = window.setTimeout(() => {
-    playback.qualityTimer = null;
-    if (
-      requestId !== playback.requestId
-      || !video.classList.contains("is-playing")
-      || liveMoveVideosDisabled
-    ) {
-      return;
-    }
-
-    const endQuality = video.getVideoPlaybackQuality();
-    const totalFrames = Math.max(0, endQuality.totalVideoFrames - startQuality.totalVideoFrames);
-    const droppedFrames = Math.max(0, endQuality.droppedVideoFrames - startQuality.droppedVideoFrames);
-    const droppedRatio = totalFrames > 0 ? droppedFrames / totalFrames : 0;
-    if (
-      totalFrames >= MOVE_ANIMATION_QUALITY_MIN_FRAMES
-      && droppedFrames >= MOVE_ANIMATION_QUALITY_MAX_DROPPED_FRAMES
-      && droppedRatio >= MOVE_ANIMATION_QUALITY_MAX_DROPPED_RATIO
-    ) {
-      disableLiveMoveVideosForSession();
-    }
-  }, MOVE_ANIMATION_QUALITY_SAMPLE_MS);
+function cancelAllMoveAnimationReadiness() {
+  [...moveAnimationReadinessJobs.values()].forEach((job) => job.cancel());
 }
 
 function verifyLiveMoveTransparency(video) {
@@ -703,15 +665,38 @@ function verifyLiveMoveTransparency(video) {
   }
 }
 
-function clearLiveBattleAnimations() {
+function clearLiveBattleAnimations({ cancelReadiness = true, preservePreparedVideos = false } = {}) {
   liveBattleTimers.forEach((timer) => window.clearTimeout(timer));
   liveBattleTimers.clear();
   liveBattleAnimationToken = null;
   lastBattleSnapshot = null;
   elements.liveBattleMove.classList.remove("is-showing");
   elements.liveBattleImpact.classList.remove("is-bursting");
-  elements.moveAnimations.forEach(clearMoveAnimationPlayback);
+  if (cancelReadiness) {
+    cancelAllMoveAnimationReadiness();
+  }
+  elements.moveAnimations
+    .filter((video) => !preservePreparedVideos || video.classList.contains("is-playing"))
+    .forEach(clearMoveAnimationPlayback);
   activeLiveMoveVideos.clear();
+}
+
+function pruneMoveAnimationReadiness(state) {
+  const activeTokens = new Set([
+    ...Object.values(state?.pendingMoves || {}),
+    ...Object.values(state?.activeMoves || {})
+  ].map((entry) => entry?.token).filter(Boolean));
+
+  moveAnimationReadinessJobs.forEach((_, token) => {
+    if (!activeTokens.has(token)) {
+      cancelMoveAnimationReadiness(token);
+    }
+  });
+  moveAnimationReadinessByToken.forEach((_, token) => {
+    if (!activeTokens.has(token)) {
+      moveAnimationReadinessByToken.delete(token);
+    }
+  });
 }
 
 function getPlayerBattleCard(playerId) {
@@ -846,7 +831,6 @@ function warmSelectedCharacterAnimations(state) {
     state?.status === "attract"
     || constrainedAnimationDevice
     || !preferTransparentBattleAnimations
-    || liveMoveVideosDisabled
   ) {
     return;
   }
@@ -879,7 +863,6 @@ function prepareMoveAnimation(
     || !move?.animation
     || !preferTransparency
     || !transparentMoveAnimationsSupported
-    || (elements.moveAnimations.includes(video) && liveMoveVideosDisabled)
     || video.classList.contains("is-playing")
   ) {
     return;
@@ -888,19 +871,14 @@ function prepareMoveAnimation(
   const usesTransparency = true;
   const sourceUrl = moveAnimationUrl(move, true);
   const alternateUrl = null;
-  if (!sourceUrl || (
-    video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA
-    && [sourceUrl, alternateUrl].includes(video.src)
-  )) {
+  if (!sourceUrl || (video.src === sourceUrl && !video.error)) {
     return;
   }
 
   const playback = getMoveAnimationPlaybackState(video);
   window.clearTimeout(playback.fallbackTimer);
-  window.clearTimeout(playback.qualityTimer);
   window.clearTimeout(playback.watchdogTimer);
   playback.fallbackTimer = null;
-  playback.qualityTimer = null;
   playback.watchdogTimer = null;
   playback.requestId += 1;
   video.pause();
@@ -917,21 +895,119 @@ function prepareMoveAnimation(
     video.classList.toggle("has-transparent-source", nextUsesTransparency);
     video.onerror = fallbackUrl && nextUrl !== fallbackUrl
       ? () => loadPreparedSource(fallbackUrl, !usesTransparency)
-      : elements.moveAnimations.includes(video)
-        ? () => disableLiveMoveVideosForSession()
-        : null;
-    video.oncanplay = elements.moveAnimations.includes(video)
-      ? () => {
-        video.oncanplay = null;
-        if (!verifyLiveMoveTransparency(video)) {
-          disableLiveMoveVideosForSession();
-        }
-      }
       : null;
+    video.oncanplay = null;
     video.src = nextUrl;
     video.load();
   };
   loadPreparedSource(sourceUrl, usesTransparency);
+}
+
+function waitForMoveAnimationReady(move, video, token) {
+  if (
+    !video
+    || !move?.animation
+    || !token
+    || !preferTransparentBattleAnimations
+    || !transparentMoveAnimationsSupported
+  ) {
+    if (token) {
+      moveAnimationReadinessByToken.set(token, false);
+    }
+    return Promise.resolve(false);
+  }
+
+  const sourceUrl = moveAnimationUrl(move, true);
+  if (!sourceUrl) {
+    moveAnimationReadinessByToken.set(token, false);
+    return Promise.resolve(false);
+  }
+
+  if (moveAnimationReadinessByToken.has(token)) {
+    return Promise.resolve(moveAnimationReadinessByToken.get(token));
+  }
+
+  const existingJob = moveAnimationReadinessJobs.get(token);
+  if (existingJob) {
+    return existingJob.promise;
+  }
+
+  const job = { cancel: null, promise: null };
+  job.promise = new Promise((resolve) => {
+    let settled = false;
+    let timeout = null;
+    const finish = (ready, recordResult = true) => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      window.clearTimeout(timeout);
+      video.removeEventListener("canplay", handleCanPlay);
+      video.removeEventListener("error", handleError);
+      if (moveAnimationReadinessJobs.get(token) === job) {
+        moveAnimationReadinessJobs.delete(token);
+      }
+      if (recordResult) {
+        moveAnimationReadinessByToken.set(token, ready);
+      }
+      resolve(ready);
+    };
+    const handleCanPlay = () => {
+      if (video.src !== sourceUrl) {
+        return;
+      }
+
+      if (!verifyLiveMoveTransparency(video)) {
+        finish(false);
+        return;
+      }
+
+      finish(true);
+    };
+    const handleError = () => {
+      if (video.src === sourceUrl) {
+        finish(false);
+      }
+    };
+
+    job.cancel = () => finish(false, false);
+    moveAnimationReadinessJobs.set(token, job);
+
+    video.addEventListener("canplay", handleCanPlay);
+    video.addEventListener("error", handleError);
+    timeout = window.setTimeout(() => finish(false), MOVE_ANIMATION_READY_TIMEOUT_MS);
+
+    if (video.src !== sourceUrl) {
+      prepareMoveAnimation(move, video, true);
+    }
+
+    if (video.error) {
+      handleError();
+    } else if (video.src === sourceUrl && video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+      handleCanPlay();
+    }
+  });
+
+  return job.promise;
+}
+
+function waitForPendingMoveAnimations(state) {
+  const pendingMoves = state?.pendingMoves || {};
+  const jobs = getOrderedPlayers(state)
+    .filter((player) => player.hp > 0)
+    .map((player, index) => {
+      const pendingMove = pendingMoves[player.id];
+      return {
+        move: getMove(pendingMove?.moveId),
+        token: pendingMove?.token,
+        video: elements.moveAnimations[index % elements.moveAnimations.length]
+      };
+    })
+    .filter(({ move, token }) => move && token)
+    .map(({ move, token, video }) => waitForMoveAnimationReady(move, video, token));
+
+  return Promise.all(jobs);
 }
 
 function playMoveAnimation(
@@ -944,20 +1020,24 @@ function playMoveAnimation(
     || !move?.animation
     || !preferTransparency
     || !transparentMoveAnimationsSupported
-    || (elements.moveAnimations.includes(video) && liveMoveVideosDisabled)
   ) {
     return;
   }
 
   const playback = getMoveAnimationPlaybackState(video);
   window.clearTimeout(playback.fallbackTimer);
-  window.clearTimeout(playback.qualityTimer);
   window.clearTimeout(playback.watchdogTimer);
   playback.fallbackTimer = null;
-  playback.qualityTimer = null;
   playback.watchdogTimer = null;
   const requestId = ++playback.requestId;
   const transparentUrl = moveAnimationUrl(move, true);
+  const isLiveVideo = elements.moveAnimations.includes(video);
+  if (
+    isLiveVideo
+    && (video.src !== transparentUrl || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA)
+  ) {
+    return;
+  }
   const preferredUrl = transparentUrl;
   const secondaryUrl = null;
   const preparedUrl = video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA
@@ -968,18 +1048,18 @@ function playMoveAnimation(
   const retryUrl = preparedUrl === preferredUrl ? secondaryUrl : preferredUrl;
   const hasRetrySource = Boolean(retryUrl && retryUrl !== preparedUrl);
 
-  const finishPlayback = (disableLiveVideos = false) => {
-    window.clearTimeout(playback.qualityTimer);
+  const finishPlayback = () => {
+    window.clearTimeout(playback.fallbackTimer);
     window.clearTimeout(playback.watchdogTimer);
-    playback.qualityTimer = null;
+    playback.fallbackTimer = null;
     playback.watchdogTimer = null;
+    video.oncanplay = null;
+    video.onerror = null;
+    video.pause();
     setMoveAnimationPlaying(video, false);
-    if (elements.moveAnimations.includes(video)) {
+    if (isLiveVideo) {
       activeLiveMoveVideos.delete(video);
       resumeBattleBackgroundAfterMove();
-      if (disableLiveVideos) {
-        disableLiveMoveVideosForSession();
-      }
     }
   };
 
@@ -989,59 +1069,41 @@ function playMoveAnimation(
     }
 
     window.clearTimeout(playback.fallbackTimer);
-    window.clearTimeout(playback.qualityTimer);
     window.clearTimeout(playback.watchdogTimer);
     playback.fallbackTimer = null;
-    playback.qualityTimer = null;
     playback.watchdogTimer = null;
     video.oncanplay = null;
-    video.onerror = () => finishPlayback(true);
+    video.onerror = finishPlayback;
     video.pause();
-    if (elements.moveAnimations.includes(video) && !verifyLiveMoveTransparency(video)) {
-      finishPlayback(true);
+    if (isLiveVideo && !verifyLiveMoveTransparency(video)) {
+      finishPlayback();
       return;
     }
     video.currentTime = 0;
     setMoveAnimationPlaying(video, false);
     video.classList.toggle("has-transparent-source", usesTransparency);
     setMoveAnimationPlaying(video, true);
-    if (elements.moveAnimations.includes(video)) {
+    if (isLiveVideo) {
       activeLiveMoveVideos.add(video);
       suspendBattleBackgroundForMove();
     }
-    const startQuality = elements.moveAnimations.includes(video)
-      ? video.getVideoPlaybackQuality?.()
-      : null;
     video.play()
-      .then(() => {
-        if (
-          requestId === playback.requestId
-          && video.classList.contains("is-playing")
-          && elements.moveAnimations.includes(video)
-          && !liveMoveVideosDisabled
-        ) {
-          monitorLiveMovePlaybackQuality(video, playback, requestId, startQuality);
-        }
-      })
       .catch(() => {
         if (requestId !== playback.requestId) {
           return;
         }
 
-        if (elements.moveAnimations.includes(video)) {
+        if (isLiveVideo) {
           activeLiveMoveVideos.delete(video);
           resumeBattleBackgroundAfterMove();
         }
         if (retryUrl) {
           loadSource(retryUrl, retryUsesTransparency);
         } else {
-          finishPlayback(true);
+          finishPlayback();
         }
       });
-    playback.watchdogTimer = window.setTimeout(
-      () => finishPlayback(true),
-      MOVE_ANIMATION_PLAYBACK_WATCHDOG_MS
-    );
+    playback.watchdogTimer = window.setTimeout(finishPlayback, MOVE_ANIMATION_PLAYBACK_WATCHDOG_MS);
   };
 
   const loadSource = (sourceUrl, usesTransparency, retryUrl = null, retryUsesTransparency = false) => {
@@ -1050,10 +1112,8 @@ function playMoveAnimation(
     }
 
     window.clearTimeout(playback.fallbackTimer);
-    window.clearTimeout(playback.qualityTimer);
     window.clearTimeout(playback.watchdogTimer);
     playback.fallbackTimer = null;
-    playback.qualityTimer = null;
     playback.watchdogTimer = null;
     video.pause();
     setMoveAnimationPlaying(video, false);
@@ -1064,13 +1124,13 @@ function playMoveAnimation(
         return;
       }
 
-      if (elements.moveAnimations.includes(video)) {
+      if (isLiveVideo) {
         resumeBattleBackgroundAfterMove();
       }
       if (retryUrl) {
         loadSource(retryUrl, retryUsesTransparency);
       } else {
-        finishPlayback(true);
+        finishPlayback();
       }
     };
 
@@ -1084,14 +1144,21 @@ function playMoveAnimation(
       return;
     }
 
-    if (retryUrl) {
-      playback.fallbackTimer = window.setTimeout(() => {
-        playback.fallbackTimer = null;
-        if (requestId === playback.requestId && !video.classList.contains("is-playing")) {
-          loadSource(retryUrl, retryUsesTransparency);
-        }
-      }, MOVE_ANIMATION_FALLBACK_TIMEOUT_MS);
+    if (isLiveVideo) {
+      finishPlayback();
+      return;
     }
+
+    playback.fallbackTimer = window.setTimeout(() => {
+      playback.fallbackTimer = null;
+      if (requestId === playback.requestId && !video.classList.contains("is-playing")) {
+        if (retryUrl) {
+          loadSource(retryUrl, retryUsesTransparency);
+        } else {
+          finishPlayback();
+        }
+      }
+    }, MOVE_ANIMATION_FALLBACK_TIMEOUT_MS);
   };
 
   loadSource(
@@ -1123,18 +1190,29 @@ function animateResolvingMoves(state) {
 
   liveBattleAnimationToken = token;
   const actions = getOrderedPlayers(state)
-    .map((player) => ({ player, move: getMove(activeMoves[player.id]?.moveId) }))
+    .map((player) => ({
+      player,
+      move: getMove(activeMoves[player.id]?.moveId),
+      token: activeMoves[player.id]?.token
+    }))
     .filter((action) => action.move && action.player.hp > 0);
 
-  actions.forEach(({ player, move }, index) => {
+  actions.forEach(({ player, move, token: moveToken }, index) => {
     scheduleLiveBattleAnimation(() => {
-      if (elements.battleView.hidden) {
+      if (elements.battleView.hidden || document.hidden) {
         return;
       }
 
       const playerCard = getPlayerBattleCard(player.id);
       showLiveBattleAction(move.name, randomItem(IDLE_IMPACT_WORDS));
-      playMoveAnimation(move, elements.moveAnimations[index % elements.moveAnimations.length]);
+      const video = elements.moveAnimations[index % elements.moveAnimations.length];
+      if (
+        moveAnimationReadinessByToken.get(moveToken) === true
+        && video.src === moveAnimationUrl(move, true)
+        && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA
+      ) {
+        playMoveAnimation(move, video);
+      }
       animateIdleElement(playerCard, "is-live-attacking", 680);
       if (move.power || move.hits) {
         animateIdleElement(elements.monsterCard, "is-live-hit", 580);
@@ -1468,6 +1546,7 @@ function renderGameOver(state) {
 }
 
 function render(state) {
+  pruneMoveAnimationReadiness(state);
   warmSelectedCharacterArt(state);
   warmSelectedCharacterAnimations(state);
   updateGameCodeLabels(state);
@@ -1555,14 +1634,33 @@ async function resolvePendingMoves(state) {
   resolvingToken = token;
   const activeGameId = gameId;
   const activeSessionRef = sessionRef;
+  await waitForPendingMoveAnimations(state);
+
+  if (gameId !== activeGameId || resolvingToken !== token) {
+    return;
+  }
+
+  const readySnapshot = await get(activeSessionRef);
+  const readyState = readySnapshot.val();
+  const readyToken = Object.values(readyState?.pendingMoves || {})
+    .map((entry) => entry.token)
+    .sort()
+    .join("|");
+  if (!readyState || readyState.status !== "battle" || readyToken !== token) {
+    if (resolvingToken === token) {
+      resolvingToken = null;
+    }
+    return;
+  }
+
   await update(activeSessionRef, {
     status: "resolving",
-    activeMoves: state.pendingMoves,
+    activeMoves: readyState.pendingMoves,
     lastActionAt: serverTimestamp()
   });
 
   const animationDelay = PLAYER_LOOK_UP_DELAY_MS + 1400
-    + Math.max(0, getAlivePlayerIds(state).length - 1)
+    + Math.max(0, getAlivePlayerIds(readyState).length - 1)
       * (LIVE_MOVE_ANIMATION_SPACING_MS + MOVE_ANIMATION_FALLBACK_TIMEOUT_MS);
 
   window.setTimeout(async () => {
@@ -1674,7 +1772,7 @@ async function boot() {
       if (battleBackgroundRunning) {
         stopBattleBackground();
       }
-      clearLiveBattleAnimations();
+      clearLiveBattleAnimations({ cancelReadiness: false, preservePreparedVideos: true });
       return;
     }
 
@@ -1689,9 +1787,7 @@ async function boot() {
     video?.addEventListener("ended", () => {
       setMoveAnimationPlaying(video, false);
       const playback = getMoveAnimationPlaybackState(video);
-      window.clearTimeout(playback.qualityTimer);
       window.clearTimeout(playback.watchdogTimer);
-      playback.qualityTimer = null;
       playback.watchdogTimer = null;
       video.currentTime = 0;
       if (elements.moveAnimations.includes(video)) {
@@ -1725,6 +1821,9 @@ async function boot() {
 }
 
 async function activateSession(nextGameId, createNew) {
+  cancelAllMoveAnimationReadiness();
+  moveAnimationReadinessByToken.clear();
+  liveMoveTransparencyVerified = false;
   gameId = nextGameId;
   gameCode = formatGameCode(gameId);
   sessionRef = ref(db, `sessions/${gameId}`);
